@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<GeODinClass Version="1.0">
+	<GQQuery ID="2" P01ST="Alle Bohrungen" P02BY="6" P03BY="0" P04BY="0" P10BY="0" P13BY="0" P14ST="">
+		<GQConfig ID="5">
+			<StringList ID="1" PropertyClass="ST"/>
+			<GQConfigSysExecute ID="2" P01BY="0" P03BY="0" P04IL="0">
+				<StringList ID="2" PropertyClass="ST"/>
+			</GQConfigSysExecute>
+			<GQConfigGOM ID="3" P01BY="1" P02BY="1">
+				<IDList ID="3" PropertyClass="WL"/>
+				<IDList ID="4" PropertyClass="WL"/>
+			</GQConfigGOM>
+		</GQConfig>
+		<GQQueries ID="6" P02BY="0" P03BY="0">
+			<GQSingleQueries ID="1">
+				<GQSingleQuery P01ST="Ohne Name" P02BY="3" P08BY="0" P09ST="" P12BY="0">
+					<GQTables ID="3">
+						<GQTable P01ST="GEODIN_LOC_LOCREG"/>
+					</GQTables>
+					<GQTemplateDef ID="4" P04BY="1" P05BY="0" P06BY="0">
+						<GQTemplateJoin ID="1" P01ST="GEODIN_LOC_LOCREG"/>
+						<GQTemplateDestFields ID="2" P01ST="GEODIN_LOC_LOCREG.PRJ_ID" P02ST="GEODIN_LOC_LOCREG.LOCID" P03ST="GEODIN_LOC_LOCREG.INVID" P04ST="GEODIN_LOC_LOCREG.XCOORD" P05ST="GEODIN_LOC_LOCREG.YCOORD" P06ST="GEODIN_LOC_LOCREG.INVID"/>
+						<GQTemplateWhereFields ID="3" P01ST="GEODIN_LOC_LOCREG.PRJ_ID" P02ST="GEODIN_LOC_LOCREG.LOCID" P03ST="GEODIN_LOC_LOCREG.INVID"/>
+					</GQTemplateDef>
+					<GQWhere ID="5"/>
+					<GQVisuals ID="6">
+						<GQVisual P01ST="GEODIN_LOC_LOCREG.SHORTNAME" P02ST="" P03BY="1"/>
+					</GQVisuals>
+					<GQUserSQL ID="7" P01ST=""/>
+					<GQOrders ID="10"/>
+					<GQResultFields ID="11">
+						<GQResultField P01ST="GEODIN_LOC_LOCREG.SHORTNAME"/>
+						<GQResultField P01ST="GEODIN_LOC_LOCREG.LONGNAME"/>
+						<GQResultField P01ST="GEODIN_LOC_LOCREG.ZCOORDE"/>
+					</GQResultFields>
+				</GQSingleQuery>
+			</GQSingleQueries>
+			<GQSingleQueries ID="4"/>
+		</GQQueries>
+		<PreSelections ID="8"/>
+		<FavouredQueryLayouts ID="9">
+			<FavouredLayouts ID="1"/>
+			<FavouredLayouts ID="2"/>
+		</FavouredQueryLayouts>
+		<EGIS_LayerConfig ID="11" P01ST="">
+			<EGIS_SingleObjectMethods ID="2">
+				<EGIS_ObjectMethod P01BY="18"/>
+				<EGIS_ObjectMethod P01BY="1"/>
+				<EGIS_ObjectMethod P01BY="2"/>
+				<EGIS_ObjectMethod P01BY="3"/>
+				<EGIS_ObjectMethod P01BY="8"/>
+			</EGIS_SingleObjectMethods>
+			<EGIS_MultiObjectMethods ID="3"/>
+		</EGIS_LayerConfig>
+		<FavouredQueryURLs ID="12">
+			<FavouredURLs ID="1"/>
+			<FavouredURLs ID="2"/>
+		</FavouredQueryURLs>
+	</GQQuery>
+</GeODinClass>

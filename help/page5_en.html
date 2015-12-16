@@ -1,0 +1,75 @@
+<html lang="en">
+  <head>
+	<meta charset="UTF-8">
+    <title>New Object</title>
+  <head>
+  <body>
+    <h1> New Object  </h1>
+	<p>
+		The reght click menu on the node "All Objects" allows the creation of new objects.
+		<img src="images/en/Context_menu_new_object.png" alt="Context_menu_new_object.png" style="width:40%;">
+		</br>
+		</br>
+		A right docked window opens.
+		</br>
+		</br>
+		<img src="images/en/GeODin New Object0.png" alt="GeODin New Object0.png" style="width:35%;">
+		</br>
+		</br>
+		<b>Adding a vector file</b>
+		</br>
+		</br>
+		New objects will be stored in a vector file as points. There are three possibilities:
+		</br>
+		1. The user can create a new vector file in the file system. Two dialogs will open to specify the coordinate system and the path of the file. If successful, the new vector file will be loaded and displayed in the QGIS layer list.
+		</br>
+		2. The user can load an already existing vector file from the file system. If successful, the new vector file will be loaded and displayed in the QGIS layer list.
+		</br>
+		3. The user can use an already loaded vector file. To do so the vector file must be "visible" in the QGIS layer list. A dialog opens to select the file from the layer list. The file must exist in the file system, volatile files are not permitted, because they are loaded to the memory of the PC. The structure of the attribute table must correspond to the plugin's specifications. This means, that the vector file had to be created in the past by the usage of this plugin.
+		</br>
+		</br>
+		<img src="images/en/Drag_Shape.png" alt="Drag_Shape.png" style="width:55%;">
+		</br>
+		</br>
+		The cases 2 and 3 will fill the table of the method "New Objects" with the coordinates of the points, if the vector file is not empty.
+		</br>
+		</br>
+		<b>Adding a new object</b>
+		</br>
+		</br>
+		To add a new object the editing mode of QGIS is used. To do so the vector file is selected in the layer list and the editing mode is toggled on. Now new points can be created in the map.
+		</br>
+		</br>
+		<img src="images/Edit.png" alt="Edit.png" style="width:35%;">
+		</br>
+		<img src="images/Move.png" alt="Move.png" style="width:35%;">
+		</br>
+		</br>
+		Also the points can be moved by using the node tool.
+		</br>
+		</br>
+		The method "New Object" also allows entering exact coordinated, for this the edting mode must be toggled on. A double click on the proper cell allows to make an entry.
+		</br>
+		</br>
+		To delete entries from the table the edting mode must be toggled on. The entry will be deleted from the vector file and is no longer part of the map or the tables.
+		</br>
+		</br>
+		To accept new, changed or deleted objects the edting mode must be ended and all changes must be saved. Only then changes will be visible in the attribute and the coordinate table.
+		</br>
+		</br>
+		<b>Note: Due to an error in the QGIS kernel a crash of the software may occur, if the edting mode is ended with discarding all changes.</b>
+		</br>
+		</br>
+		<b>Export of a new object</b>
+		</br>
+		</br>
+		A new object, created by the usage of the plugin, is stored inside a vector layer but is not yet part of a GeODin database. To do so the object is selected in the coordinate table, the export coordinates will be displayed in the windows above. The button "GeODin" is now availbale, which was deactivated before. A click on the button opens a COM function in the background, starting the method "Data management" to add the object to the database. If more than one object is selected, the export function is deactivated. Only one object at a time can be transferred to GeODin. For adding multiple objects to the database the GeODin method "Import general data" can be used to import a shape file.
+		</br>
+		</br>
+		<img src="images/en/GeODin New Object1.png" alt="GeODin New Object1.png" style="width:40%;"><img src="images/en/GeODin New Object.png" alt="GeODin New Object.png" style="width:50%;">
+		</br>
+		</br>
+		After adding the new object to the database it will appear in an automated query inside the GeODin obejct manager and not as part of the proper object type. For this the database has to be reloaded, the same procedure applies to QGIS.
+	<p>
+  </body>
+</html>

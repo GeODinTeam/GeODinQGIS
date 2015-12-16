@@ -1,0 +1,36 @@
+<html lang="en">
+  <head>
+	<meta charset="UTF-8">
+    <title>Visualisation in QGIS</title>
+  <head>
+  <body>
+    <h1> Visualisation in QGIS  </h1>
+	<p>
+		In addition to the database objects the database shape files are imported to QGIS, if they were properly stored in the GeODin folder "Documents". As they are vector files they can easily added to the QGIS map canvas.
+		</br>
+		</br>
+		<img src="images/en/Documents.png" alt="Documents.png" style="width:40%;">
+		</br>
+		</br>
+		The right click menu is called to add the proper group or file to the map. The shape file already has a geospatial reference, so no dialog is needed to choose the correct coordinate system.
+		</br>
+		</br>
+		In the same way all objects of a project or objects of one object type can be added to the map. Therefore the right click menu is called below the level "All Objects".
+		</br>
+		</br>
+		<img src="images/en/Context_menu2.png" alt="Context_menu2.png" style="width:40%;">
+		</br>
+		</br>
+		These points are stored in a temporary vector file. A dialog opens afterwards to define the proper projections of the vector file.
+		</br>
+		</br>
+		<b>Note: Cancelling the dialog for the selection of a coordinate system will use the default coordinate system for spatial reference (usually WGS84). This is an internal function of QGIS and can be changed in the QGIS settings. Cancelling this process does not mean that adding the points to map is interrupted. </b>
+		</br>
+		</br>
+		If objects were added to map canvas and changes have been made to the database, this changes can be synchronised with the vector file in QGIS. To do so the "refresh" button in the upper toolbar is used. This will read changes in the database and transfer them to the vector file. If the vector file was changed independently from the database, any changes will be lost.
+		</br>
+		</br>
+		<img src="images/refresh.png" alt="refresh.png" style="width:40%;">
+	<p>
+  </body>
+</html>

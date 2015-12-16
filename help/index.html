@@ -1,0 +1,48 @@
+<html>
+<head>
+
+<style>
+	#head{
+		width: 100%;
+		height: 5%;
+	}
+
+	#menu{
+		width: 15%;
+		height: 90%;
+		positioning: relative;
+		float: left;
+	}
+	
+	#window{
+		width: 84%;
+		height: 90%;
+</style>
+</head>
+<body>
+	<h1 id="head" align="center">GeODinQGIS Help</h1>
+    <iframe id="menu" src=""></iframe>
+    <iframe id="window" name="window" src=""></iframe>
+	
+	<script>
+
+		var parameters = location.search.substring(1).split("&");
+
+		var parameter = parameters[0].split("=");
+		
+		var lang = unescape(parameter[1]);
+		if (lang=="de"){
+			document.title = "GeODinQGIS Hilfe"
+			document.getElementById("head").innerHTML = "GeODinQGIS Hilfe";
+			document.getElementById("menu").src = "menu_de.html";
+			document.getElementById("window").src = "home_de.html";
+		}
+		if (lang=="en"){
+			document.title = "GeODinQGIS Help"
+			document.getElementById("head").innerHTML = "GeODinQGIS Help";
+			document.getElementById("menu").src = "menu_en.html";
+			document.getElementById("window").src = "home_en.html";
+		}
+	</script>
+</body>
+</html>

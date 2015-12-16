@@ -1,0 +1,34 @@
+<RCC>
+    <qresource prefix="/plugins/GeODinQGIS" >
+		<file>icons/logo.png</file>
+		<file>icons/i_484F.png</file>
+        <file>icons/i_099F.png</file>
+		<file>icons/i_126F.png</file>
+		<file>icons/i_222F.png</file>
+		<file>icons/i_232F.png</file>
+		<file>icons/i_485F.png</file>
+		<file>icons/i_101F.png</file>
+		<file>icons/i_371F.png</file>
+		<file>icons/i_370F.png</file>
+		<file>icons/i_372F.png</file>
+		<file>icons/i_373F.png</file>
+		<file>icons/i_100F.png</file>
+		<file>icons/i_102F.png</file>
+		<file>icons/i_157F.png</file>
+		<file>icons/i_246F.png</file>
+		<file>icons/i_095F.png</file>
+		<file>icons/help.png</file>
+		<file>icons/edit.png</file>
+		<file>icons/point_add_n.png</file>
+		<file>icons/point_create_n.png</file>
+		<file>icons/system_refresh.png</file>
+		<file>icons/system_help.png</file>
+		<file>icons/system_run.png</file>
+		<file>icons/i_090F.png</file>
+		<file>icons/point_drag_n.png</file>
+		<file>icons/i_0815F.png</file>
+		<file>icons/settings.png</file>
+		<file>icons/info.png</file>
+		<file>icons/fugro.png</file>
+    </qresource>
+</RCC>

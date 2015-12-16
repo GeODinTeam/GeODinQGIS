@@ -1,0 +1,36 @@
+# This file contains metadata for your plugin. Since 
+# version 2.0 of QGIS this is the proper way to supply 
+# information about a plugin. The old method of 
+# embedding metadata in __init__.py will 
+# is no longer supported since version 2.0.
+
+# This file should be included when you package your plugin.# Mandatory items:
+
+[general]
+name=GeODin QGIS
+qgisMinimumVersion=2.0
+description=This plugin connects GeODin with QGIS
+about=GeODinQGIS is an additional tool for the work with GeODin. It connects GeODin databases with QGIS. Currently supported actions are: creation of new GeODin obejcts, display GeODin data in QGIS, execute SQL queries, view GeODin layouts.
+version=1.0
+author=Fugro Consult GmbH
+email=support@geodin.com
+
+# End of mandatory metadata
+
+# Optional items:
+
+# Uncomment the following line and add your changelog:
+# changelog=
+
+# Tags are comma separated with spaces allowed
+tags=
+
+homepage=www.geodin.com
+tracker=http://www.geodin.com/contact/contact_form
+repository=
+icon=logo.png
+# experimental flag
+experimental=False
+
+# deprecated flag (applies to the whole plugin, not just a single version)
+deprecated=False
