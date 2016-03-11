@@ -24,6 +24,7 @@ from PyQt4.QtCore import *
 from PyQt4.QtGui import *
 from qgis.core import *
 from qgis.gui import *
+from win32api import GetSystemMetrics
 import sys
 
 import resources_rc, os.path
@@ -32,6 +33,7 @@ from GeODinQGIS_Main import GeODinQGISMain
 from GeODinQGIS_Settings import Settings
 from ui_Files.ui_GeODinQGIS_Help import Ui_HelpDialog
 from pythonmodules.helpFunction import *
+from extras.layout import ImageLayout
 
 class GeODinQGIS:
 
@@ -135,9 +137,14 @@ class GeODinQGIS:
 		self.iface.addDockWidget(Qt.RightDockWidgetArea, self.main)
 		
 	def openHelp(self):
-		# open plugin documentation
-		page = self.plugin_dir+'/help/index.html?language='+self.language
-		helpPage = HelpObject(page, self.main.dictionary.getWord(self.main.lang,"GeODinQGIS Help"))
+		if self.language == 'en':
+			path = self.plugin_dir + "\help\help_en.pdf"
+		elif self.language == 'de':
+			path = self.plugin_dir + "\help\help_de.pdf"
+		
+		ImageLayout(path, "GeODinQGIS Help")
+
+
 		
 	def refresh(self):
 		#Warning message box with two buttons
