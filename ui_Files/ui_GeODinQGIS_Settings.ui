@@ -184,7 +184,7 @@
     <string>Save Layer as</string>
    </property>
   </widget>
-  <widget class="QRadioButton" name="rtbn_sql">
+  <widget class="QRadioButton" name="rbtn_sql">
    <property name="geometry">
     <rect>
      <x>150</x>

@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'ui_Files\ui_GeODinQGIS_Settings.ui'
 #
-# Created: Thu Sep 24 16:29:40 2015
+# Created: Tue Mar 29 11:37:29 2016
 #      by: PyQt4 UI code generator 4.11.3
 #
 # WARNING! All changes made in this file will be lost!
@@ -72,11 +72,11 @@ class Ui_Settings(object):
         self.lbl_lyr = QtGui.QLabel(Settings)
         self.lbl_lyr.setGeometry(QtCore.QRect(20, 160, 121, 16))
         self.lbl_lyr.setObjectName(_fromUtf8("lbl_lyr"))
-        self.rtbn_sql = QtGui.QRadioButton(Settings)
-        self.rtbn_sql.setGeometry(QtCore.QRect(150, 160, 82, 17))
-        self.rtbn_sql.setCheckable(True)
-        self.rtbn_sql.setChecked(True)
-        self.rtbn_sql.setObjectName(_fromUtf8("rtbn_sql"))
+        self.rbtn_sql = QtGui.QRadioButton(Settings)
+        self.rbtn_sql.setGeometry(QtCore.QRect(150, 160, 82, 17))
+        self.rbtn_sql.setCheckable(True)
+        self.rbtn_sql.setChecked(True)
+        self.rbtn_sql.setObjectName(_fromUtf8("rbtn_sql"))
         self.rbtn_shp = QtGui.QRadioButton(Settings)
         self.rbtn_shp.setGeometry(QtCore.QRect(230, 160, 82, 17))
         self.rbtn_shp.setObjectName(_fromUtf8("rbtn_shp"))
@@ -102,7 +102,7 @@ class Ui_Settings(object):
         self.lbl_dir.setText(_translate("Settings", "Directory to save vector layers", None))
         self.btn_dir.setText(_translate("Settings", "...", None))
         self.lbl_lyr.setText(_translate("Settings", "Save Layer as", None))
-        self.rtbn_sql.setText(_translate("Settings", "SQLite", None))
+        self.rbtn_sql.setText(_translate("Settings", "SQLite", None))
         self.rbtn_shp.setText(_translate("Settings", "Shape", None))
         self.btn_defdir.setText(_translate("Settings", "Restore Default", None))
 
