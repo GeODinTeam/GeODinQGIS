@@ -76,9 +76,14 @@ class Settings(QDialog, Ui_Settings):
 			self.checkBox.setChecked(False)
 			
 		if self.config.get("Options", "savelayer") == "True":
-			self.rbtn_shp.setChecked(True)
+			self.rbtn_sql.setChecked(True)
+#			self.rbtn_sql.setChecked(False)
+			print self.rbtn_shp.isChecked()
+			print self.rbtn_sql.isChecked()
 		else:
-			self.rtbn_sql.setChecked(True)
+			self.rbtn_shp.setChecked(True)
+#			self.rbtn_shp.setChecked(False)
+
 		
 	def okClick(self):
 		self.main.tmpDirectory = self.le_dir.text()
