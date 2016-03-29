@@ -1,0 +1,5 @@
+Version 1.01 (2016-03-29):
+---------------------------
+* Settings dialogue: repair switching between SQL and shape format
+* Settings dialogue: rename "rtbn_sql" to "rbtn_sql"
+* Settings dialogue: keep temporary files path
