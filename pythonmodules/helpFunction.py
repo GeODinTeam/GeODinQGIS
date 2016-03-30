@@ -400,7 +400,7 @@ class Info(QDialog):
 		font = QFont()
 		font.setPointSize(16)
 		lbl_title.setFont(font)		
-		lbl_title.setText("GeODin QGIS 1.0")
+		lbl_title.setText("GeODin QGIS 1.1")
 		
 		# GeODin Icon
 		i_geodin = QLabel(self)
