@@ -78,8 +78,6 @@ class Settings(QDialog, Ui_Settings):
 		if self.config.get("Options", "savelayer") == "True":
 			self.rbtn_sql.setChecked(True)
 #			self.rbtn_sql.setChecked(False)
-			print self.rbtn_shp.isChecked()
-			print self.rbtn_sql.isChecked()
 		else:
 			self.rbtn_shp.setChecked(True)
 #			self.rbtn_shp.setChecked(False)
@@ -94,7 +92,7 @@ class Settings(QDialog, Ui_Settings):
 			self.config.set('Options', "suppressattribute", "False")
 			QSettings().setValue( '/qgis/digitizing/disable_enter_attribute_values_dialog', False )
 			
-		if self.rtbn_sql.isChecked():
+		if self.rbtn_sql.isChecked():
 			self.config.set('Options', "savelayer", "True")
 		else:
 			self.config.set('Options', "savelayer", "False")
