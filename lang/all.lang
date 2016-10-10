@@ -79,7 +79,8 @@
 		"Directory to save vector layers":"Speicherpfad für Vektordateien",
 		"Save Layer as":"Speichere Layer als",
 		"Restore Default":"Standard wiederherstellen",
-		"open GeODin":"GeODin öffnen"
+		"open GeODin":"GeODin öffnen",
+		"no appropriate database drivers":"Kein passender Datenbanktreiber gefunden."
 	}
 ],
 "en":[
@@ -163,7 +164,8 @@
 		"Directory to save vector layers":"Directory to save vector layers",
 		"Save Layer as":"Save Layer as",
 		"Restore Default":"Restore Default",
-		"open GeODin":"open GeODin"
+		"open GeODin":"open GeODin",
+		"no appropriate database drivers":"No appropriate database drivers."
 	}
 ],
 "fr":[
@@ -246,7 +248,8 @@
 		"Directory to save vector layers":"Directory to save vector layers",
 		"Save Layer as":"Save Layer as",
 		"Restore Default":"Restore Default",
-		"open GeODin":"open GeODin"
+		"open GeODin":"open GeODin",
+		"no appropriate database drivers":"No appropriate database drivers."
 	}
 ],
 "ru":[
@@ -328,6 +331,7 @@
 		"Directory to save vector layers":"Directory to save vector layers",
 		"Save Layer as":"Save Layer as",
 		"Restore Default":"Restore Default",
-		"open GeODin":"open GeODin"
+		"open GeODin":"open GeODin",
+		"no appropriate database drivers":"No appropriate database drivers."
 	}
 ]}

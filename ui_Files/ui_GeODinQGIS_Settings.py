@@ -2,8 +2,7 @@
 
 # Form implementation generated from reading ui file 'ui_Files\ui_GeODinQGIS_Settings.ui'
 #
-# Created: Tue Mar 29 11:37:29 2016
-#      by: PyQt4 UI code generator 4.11.3
+# Created by: PyQt4 UI code generator 4.11.4
 #
 # WARNING! All changes made in this file will be lost!
 

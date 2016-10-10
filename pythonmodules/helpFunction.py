@@ -103,6 +103,7 @@ class Database(DatabaseObjects):
 	def __init__(self, name=None, filepath=None):
 		DatabaseObjects.__init__(self, name)
 		self.filepath = filepath
+		self.owner = ''
 		self.options = {}
 
 		self.projects = []
@@ -118,7 +119,7 @@ class Database(DatabaseObjects):
 
 	def delOption(self, key):
 		#Deletes an option from dictionary and returns true if it was possible,
-		#flase otherwise
+		#false otherwise
 		try:
 			del self.options[key]
 			return True
@@ -400,7 +401,7 @@ class Info(QDialog):
 		font = QFont()
 		font.setPointSize(16)
 		lbl_title.setFont(font)		
-		lbl_title.setText("GeODin QGIS 1.1")
+		lbl_title.setText("GeODin QGIS 1.1.2")
 		
 		# GeODin Icon
 		i_geodin = QLabel(self)
@@ -434,7 +435,6 @@ class Info(QDialog):
 		lbl_version1 = QLabel(self)
 		lbl_version1.setText("Full functionality only with GeODin 8.2")
 		lbl_version2 = QLabel(self)
-		lbl_version2.setText("Will be released soon")
 		
 		# Ok-Button to exit
 		buttonBox = QDialogButtonBox(self)
@@ -513,7 +513,7 @@ class ConfigParser:
 		for section in self.__dict.keys():
 			configFile.write("["+section+"]\n")
 			for key in self.__dict[section].keys():
-				print key, self.get(section, key)
+#				print key, self.get(section, key)
 				configFile.write(key+"="+self.get(section, key)+"\n")
 			
 	def sections(self):

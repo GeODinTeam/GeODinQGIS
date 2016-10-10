@@ -1,3 +1,18 @@
+Version 1.1.2 (2016-10-10):
+-------------------------
+* Display Short name in coordinate table for the method "New Object"
+* Registry database load bug fixed
+* Load layouts with german letters in file path
+
+Version 1.1.1 (2016-06-24):
+---------------------------
+* Check for Python version and give feedback
+* Catch pyodbc errors
+* Expand error log with Python version, GeODin Build number and ODBC errors
+* New icon for opened and closed databases
+* Catch error when selecting vector features outside of plugin
+
+
 Version 1.1 (2016-03-30):
 ---------------------------
 * Settings dialogue: repair switching between SQL and shape format

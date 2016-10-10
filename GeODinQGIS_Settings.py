@@ -155,5 +155,5 @@ class Settings(QDialog, Ui_Settings):
 		QSettings().setValue( '/qgis/digitizing/disable_enter_attribute_values_dialog', disableDialog )
 		
 	def openInfo(self):
-		print "Info"
+#		print "Info"
 		info = Info()

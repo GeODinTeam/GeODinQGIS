@@ -117,6 +117,7 @@ class GeODinQGIS:
 	def openSettings(self):
 		# open extra file "GeODinQGIS_Settings" and execute class "Settings" with variables from "GeODinQGIS_Main"
 		settings = Settings(self.main)
+		self.main.tmpDirectory = settings.le_dir.text()
 
 	def unload(self):
 		# unload plugin
@@ -135,6 +136,8 @@ class GeODinQGIS:
 	def openMain(self):
 		# show main functions in a right docked widget
 		self.iface.addDockWidget(Qt.RightDockWidgetArea, self.main)
+		self.main.getBuild()
+		self.main.checkVersion()
 		
 	def openHelp(self):
 		if self.language == 'en':

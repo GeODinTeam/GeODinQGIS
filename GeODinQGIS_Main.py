@@ -26,7 +26,7 @@ from qgis.core import *
 import codecs
 from ui_Files.ui_GeODinQGIS_Main import Ui_GeODinQGISMain
 
-import os, sys, time, logging, datetime, locale, ctypes, binascii, win32com.client
+import os, sys, struct, time, logging, datetime, locale, ctypes, binascii, win32com.client
 try:
 	import pyodbc
 except:
@@ -59,7 +59,7 @@ class GeODinQGISMain(QDockWidget, Ui_GeODinQGISMain):
 		QDockWidget.__init__(self)
 		self.iface = iface
 		self.setupUi(self)
-
+		
 		# local path for plugin
 		self.pluginDirectory = os.path.dirname(__file__)
 		if "Users" in self.pluginDirectory:
@@ -117,7 +117,7 @@ class GeODinQGISMain(QDockWidget, Ui_GeODinQGISMain):
 		# set treeWidget signals
 		self.connect(self.treeWidget, SIGNAL("itemExpanded(QTreeWidgetItem*)"), self.expanded)
 		self.connect(self.treeWidget, SIGNAL("itemCollapsed(QTreeWidgetItem*)"), self.collapsed)
-		self.connect(self.treeWidget, SIGNAL("itemDoubleClicked(QTreeWidgetItem*, int)"), self.buildTree)
+		#self.connect(self.treeWidget, SIGNAL("itemDoubleClicked(QTreeWidgetItem*, int)"), self.buildTree)
 		self.connect(self.treeWidget, SIGNAL("itemSelectionChanged ()"), self.activateItem)
 		self.treeWidget.setContextMenuPolicy(Qt.CustomContextMenu)
 		self.treeWidget.customContextMenuRequested.connect(self.treeMenu)
@@ -169,6 +169,9 @@ class GeODinQGISMain(QDockWidget, Ui_GeODinQGISMain):
 			os.makedirs(self.logDirectory)
 			open(self.logDirectory+'\\error.log', 'a').close()
 			
+		else:
+			open(self.logDirectory+'\\error.log', 'w').close()
+			
 		# create error logger
 		self.lgr = logging.getLogger('GeODinQGIS')
 		if not len(self.lgr.handlers):
@@ -181,6 +184,8 @@ class GeODinQGISMain(QDockWidget, Ui_GeODinQGISMain):
 			fh.setFormatter(frmt)
 			# add the Handler to the logger
 			self.lgr.addHandler(fh)
+			
+			
 		
 		
 		# if tmp directory not set, create it
@@ -193,7 +198,6 @@ class GeODinQGISMain(QDockWidget, Ui_GeODinQGISMain):
 			self.config.add_section('Databases')
 			self.config.add_section('Options')
 			self.config.set('Options', 'lang', self.lang)
-			print "hier 1"
 			self.config.set('Options', 'project', 'tmp.qgs')
 			self.config.set('Options', 'geodinrootdir', self.getGeodinPath())
 			self.config.set('Options', 'programdata', self.getProgramData())
@@ -240,7 +244,6 @@ class GeODinQGISMain(QDockWidget, Ui_GeODinQGISMain):
 		if "Options" not in self.config.sections():
 			self.config.add_section('Options')
 			self.config.set('Options', 'lang', self.lang)
-			print "hier 2"
 			self.config.set('Options', 'project', 'tmp.qgs')
 			self.config.set('Options', 'geodinrootdir', self.getGeodinPath())
 			self.config.set('Options', 'programdata', self.getProgramData())
@@ -255,11 +258,27 @@ class GeODinQGISMain(QDockWidget, Ui_GeODinQGISMain):
 			
 		self.saveConfig()
 		
-		
 		self.deny = 0
 
 		self.inProcess = False
 		
+	def getBuild(self):
+		# enter registry and get GeODin build number
+		key = OpenKey(HKEY_CURRENT_USER, r"Software\GeODin-System\System", 0, KEY_READ)
+		build, dummy = QueryValueEx(key, 'Build')
+		CloseKey(key)	
+		self.lgr.info('GeODin build Number: {0}'.format(build))
+
+	def checkVersion(self):
+		# check Python version, complying with the QGIS version
+		# version must be 32-bit
+
+		if struct.calcsize("P") * 8 != 32:
+			self.lgr.info("QGIS Python version: 64 Bit")
+			QMessageBox.warning(self, "Warning", "Only for 32 bit python. Databases can not be opened.")
+		else:
+			self.lgr.info("QGIS Python version: 32 Bit")	
+
 	def configChecker(self):
 		# set default config array to check
 		configArray = {"Databases":{}, "Options":{"lang":self.lang, "project":'tmp.qgs', "geodinrootdir":self.getGeodinPath(), "programdata":self.getProgramData(), "suppressattribute":"False", "savelayer":"True", "tmpdirectory":self.tmpDirectory}, "Layouts":{}}
@@ -280,11 +299,13 @@ class GeODinQGISMain(QDockWidget, Ui_GeODinQGISMain):
 		self.saveConfig()
 		
 	def loadMultipleDatabases(self):
+		self.readGeodinini()
 		# access key from Windows Registry
 		# open main database folder
 		key = None
 		try:
 			key = OpenKey(HKEY_CURRENT_USER, r"Software\GeODin-System\Database", 0, KEY_READ)
+#			raise WindowsError
 		except WindowsError as e:
 			self.lgr.info('{0}: {1}'.format(e, r"Computer\HKEY_CURRENT_USER\Software\GeODin-System\System"))
 			QMessageBox.information(None,self.dictionary.getWord(self.lang,"Connection Error"),self.dictionary.getWord(self.lang,"No GeODin database connections found."))
@@ -303,7 +324,8 @@ class GeODinQGISMain(QDockWidget, Ui_GeODinQGISMain):
 			try:
 				asubkey = OpenKey(key,asubkey_name)				# open subkeys (database folders)
 				try:
-					options, path = self.getConnectionOptions(QueryValueEx(asubkey, "ADOConnection")[0], "ADOConnection", asubkey_name)
+					if len(QueryValueEx(asubkey, "ADOConnection")[0]):
+						options, path = self.getConnectionOptions(QueryValueEx(asubkey, "ADOConnection")[0], "ADOConnection", asubkey_name)
 				except AttributeError as e:
 					self.lgr.error(e)
 				except KeyError as e:
@@ -371,16 +393,20 @@ class GeODinQGISMain(QDockWidget, Ui_GeODinQGISMain):
 		options["upassword"] = ""
 		path = ""
 		for option in connectionString.split(';'):
-			options[option.split('=')[0]]=option.split('=')[1]
-		
-		if key == "ADOConnection":
+			try:
+				options[option.split('=')[0]]=option.split('=')[1]
+			except IndexError as e:
+				self.lgr.error("string '" + option + "' returns " + str(e))
+				pass
+				
+		if key.lower() == "adoconnection":
 			if "Provider" in options.keys():
 				options["connection"] = options.pop("Provider")
-				if "OLEDB" in options["connection"]:
-					options["connection"] = "ODBC"
-				elif "SQLOLEDB" in options["connection"]:
+				if "SQLOLEDB.1" in options["connection"]:
 					options["connection"] = "MSQL"
-				elif "MSDAORA" in options["connection"]:
+				elif "OLEDB" in options["connection"]:
+					options["connection"] = "ODBC"
+				elif "MSDAORA.1" in options["connection"]:
 					options["connection"] = "Oracle"
 				elif "SQLSERVER" in options["connection"]:
 					options["connection"] = "SQLCE"
@@ -402,7 +428,9 @@ class GeODinQGISMain(QDockWidget, Ui_GeODinQGISMain):
 				options["uname"] = options.pop("User ID")
 			if "Password" in options.keys():
 				options["upassword"] = options.pop("Password")
-		elif key == "FireDACConnection":
+
+		elif key.lower() == "firedacconnection":
+			
 			if "DriverID" in options.keys():
 				options["connection"] = options.pop("DriverID")
 				if "MSAcc" in options["connection"]:
@@ -412,10 +440,11 @@ class GeODinQGISMain(QDockWidget, Ui_GeODinQGISMain):
 				elif "MSSQL" in options["connection"]:
 					options["connection"] = "MSSQL"
 					options["database"] = options.pop("Database")
-				elif "Ora" in options["connection"]:
+				elif "ora" in options["connection"].lower():
 					options["connection"] = "Oracle"
 					options["ip"] = options["Database"].split('/')[0]
 					options["database"] = options["Database"].split('/')[1]
+					del options["Database"]
 				elif "MySQL" in options["connection"]:
 					options["connection"] = "MySQL"
 					options["database"] = options.pop("Database")
@@ -428,7 +457,7 @@ class GeODinQGISMain(QDockWidget, Ui_GeODinQGISMain):
 				options["uname"] = options.pop("User_Name")
 			if "Password" in options.keys():
 				options["upassword"] = options.pop("Password")
-		
+
 		if not len(path) and "database" in options.keys():
 			#if it is no local database, create a pseudo path
 			path = options["ip"]+'/'+name
@@ -509,7 +538,7 @@ class GeODinQGISMain(QDockWidget, Ui_GeODinQGISMain):
 		except WindowsError as e:
 			self.lgr.info('{0}: {1}'.format(e, r"Computer\HKEY_CURRENT_USER\Software\GeODin-System\ChildWindows\GRFMAIN\QVLayoutFolders"))
 			return ''		
-		
+		print path_data
 		return path_data
 
 	def load_db(self, database, level, project = None):
@@ -517,17 +546,17 @@ class GeODinQGISMain(QDockWidget, Ui_GeODinQGISMain):
 		if level == 0:
 			#load only project names and description
 			query = '''SELECT DISTINCT LOCPRMGR.PRJ_ID, LOCPRMGR.PRJ_USER, LOCPRMGR.PRJ_DATE, LOCPRMGR.PRJ_ALIAS, LOCPRMGR.PRJ_NAME
-						FROM GEODIN_LOC_LOCREG INNER JOIN LOCPRMGR ON GEODIN_LOC_LOCREG.PRJ_ID = LOCPRMGR.PRJ_ID
+						FROM {0}GEODIN_LOC_LOCREG INNER JOIN {0}LOCPRMGR ON GEODIN_LOC_LOCREG.PRJ_ID = LOCPRMGR.PRJ_ID
 						ORDER BY LOCPRMGR.PRJ_NAME;
-						'''			
+						'''.format(database.owner)			
 
 		elif level == 1:
 			#load information of specific project
 			query = """SELECT GEODIN_LOC_LOCREG.LONGNAME, GEODIN_SYS_LOCTYPES.GEN_NAME, GEODIN_LOC_LOCREG.INVID, GEODIN_LOC_LOCREG.SHORTNAME, GEODIN_LOC_LOCREG.XCOORD, GEODIN_LOC_LOCREG.YCOORD
-						FROM GEODIN_SYS_LOCTYPES INNER JOIN (GEODIN_LOC_LOCREG INNER JOIN LOCPRMGR ON GEODIN_LOC_LOCREG.PRJ_ID = LOCPRMGR.PRJ_ID) ON GEODIN_SYS_LOCTYPES.GEN_DESC = GEODIN_LOC_LOCREG.LOCTYPE
+						FROM {1}GEODIN_SYS_LOCTYPES INNER JOIN ({1}GEODIN_LOC_LOCREG INNER JOIN {1}LOCPRMGR ON GEODIN_LOC_LOCREG.PRJ_ID = LOCPRMGR.PRJ_ID) ON GEODIN_SYS_LOCTYPES.GEN_DESC = GEODIN_LOC_LOCREG.LOCTYPE
 						WHERE LOCPRMGR.PRJ_ID='{0}'
 						ORDER BY LOCPRMGR.PRJ_NAME, GEODIN_SYS_LOCTYPES.GEN_NAME;
-					""".format(project.id)
+					""".format(project.id, database.owner)
 		try:
 			result = None
 			if database.options["connection"] == "ODBC":
@@ -644,6 +673,39 @@ class GeODinQGISMain(QDockWidget, Ui_GeODinQGISMain):
 				cursor.close()
 				connection.close()
 			
+			# elif database.options["connection"] == "Oracle":
+				# if 'pyodbc' in sys.modules.keys():
+					# if not database.options["uname"] or not database.options["upassword"]:
+						# #if no user name or password in registry open a login dialog
+						# login = Login(database.options["uname"], database.options["upassword"])
+						# try:
+							# database.options["uname"] = login.uname
+							# database.options["upassword"] = login.upassword
+							# #connection = psycopg2.connect("dbname={0} user={1} host={2} password={3}".format(database.options["database"], database.options["uname"], database.options["ip"], database.options["upassword"]))
+							# print database.options
+							# connection = pyodbc.connect('Driver={4};Server={2}/{0}.{2};uid={1};pwd={3}'.format(database.options["database"], database.options["uname"], database.options["ip"], database.options["upassword"], '{Microdsoft ODBC for Oracle}'))
+							# del login
+						# except:
+							# del login
+							# QMessageBox.warning(self, 'Error', 'Bad user or password')
+							# database.options["upassword"] = ""
+							# return 1
+					# else:
+						# #otherwise login with given data
+						# #connection = psycopg2.connect("dbname={0} user={1} host={2} password={3}".format(database.options["database"], database.options["uname"], database.options["ip"], database.options["upassword"]))
+						# connection = pyodbc.connect('Driver={4};Server={2}/{0};uid={1};pwd={3}'.format(database.options["database"], database.options["uname"], database.options["ip"], database.options["upassword"], '{Microdsoft ODBC for Oracle}'))
+				# else:
+					# return 1
+				# cursor = connection.cursor()
+				# cursor.execute(query)
+				# result = cursor.fetchall()		
+				# cursor.close()
+				# connection.close()
+
+			else:
+				QMessageBox.information(None, database.options["connection"], self.dictionary.getWord(self.lang,"no appropriate database drivers"))
+				return
+			
 			if level == 0:
 				for row in result:
 					#store the results in the specific arrays
@@ -666,15 +728,37 @@ class GeODinQGISMain(QDockWidget, Ui_GeODinQGISMain):
 					object.coordinates = (row[4], row[5])
 					project.objects.append(object)
 			result = None
+			
 		except NameError as e:
-			self.lgr.error('path={0}, alias={1}, error={2}'.format(database.filepath, database.name, str(e)))
+			self.lgr.error('Name Error, path={0}, alias={1}, error={2}'.format(database.filepath, database.name, str(e)))
 			return 1
 		except KeyError as e:
-			self.lgr.error('path={0}, alias={1}, error={2}'.format(database.filepath, database.name, str(e)))
+			self.lgr.error('Key Error, path={0}, alias={1}, error={2}'.format(database.filepath, database.name, str(e)))
 			return 1
 		except psycopg2.ProgrammingError as e:
-			self.lgr.error('path={0}, alias={1}, error={2}'.format(database.filepath, database.name, str(e)))
+			self.lgr.error('psycopg2 Programming Error, path={0}, alias={1}, error={2}'.format(database.filepath, database.name, str(e)))
 			return 1
+		except pyodbc.OperationalError as e:
+			self.lgr.error('pyodbc Operational Error, path={0}, alias={1}, error={2}'.format(database.filepath, database.name, str(e)))
+			return 1							
+		except pyodbc.DataError as e:
+			self.lgr.error('pyodbc Data Error, path={0}, alias={1}, error={2}'.format(database.filepath, database.name, str(e)))
+			return 1			
+		except pyodbc.IntegrityError as e:
+			self.lgr.error('pyodbc Integrity Error, path={0}, alias={1}, error={2}'.format(database.filepath, database.name, str(e)))
+			return 1
+		except pyodbc.ProgrammingError as e:
+			self.lgr.error('pyodbc Programming Error, path={0}, alias={1}, error={2}'.format(database.filepath, database.name, str(e)))
+			return 1
+		except pyodbc.NotSupportedError	as e:
+			self.lgr.error('pyodbc Not Supported Error, path={0}, alias={1}, error={2}'.format(database.filepath, database.name, str(e)))
+			return 1
+		except pyodbc.DatabaseError	as e:
+			self.lgr.error('pyodbc Database Error, path={0}, alias={1}, error={2}'.format(database.filepath, database.name, str(e)))
+			return 1
+		except pyodbc.Error	as e:
+			self.lgr.error('pyodbc Error, path={0}, alias={1}, error={2}'.format(database.filepath, database.name, str(e)))
+			return 1	
 		except:
 			self.lgr.error('path='+database.filepath+', alias='+database.name + ', error=' +str(sys.exc_info()[0]))
 			return 1
@@ -705,6 +789,7 @@ class GeODinQGISMain(QDockWidget, Ui_GeODinQGISMain):
 			try:
 				clickedItem = self.treeWidget.itemFromIndex(self.treeWidget.selectedIndexes()[0])
 			except Exception,e:
+#				self.lgr.error('name='+prj.name+', id='+prj.id+ ', user='+prj.user+', alias='+prj.alias+', error=' +str(e))
 				print str(e)
 			
 		if clickedItem and clickedItem.itemType == DATABASEITEM and clickedItem.childCount() == 0:
@@ -714,9 +799,9 @@ class GeODinQGISMain(QDockWidget, Ui_GeODinQGISMain):
 				database = clickedItem.extraInformation
 			except:
 				return
-			
 			if self.load_db(database, 0):
 				#if loading database returns with errors
+				
 				self.error = 1
 				return
 			self.error = 0
@@ -879,8 +964,8 @@ class GeODinQGISMain(QDockWidget, Ui_GeODinQGISMain):
 		
 		try:
 			query = """SELECT GEODIN_SYS_PRJDEFS.OBJ_NAME
-						FROM GEODIN_SYS_PRJDEFS
-						WHERE GEODIN_SYS_PRJDEFS.PRJ_ID = '{0}' AND GEODIN_SYS_PRJDEFS.OBJ_DESC = 'LOCQUERY' """.format(item_prj.extraInformation.id)
+						FROM {1}GEODIN_SYS_PRJDEFS
+						WHERE GEODIN_SYS_PRJDEFS.PRJ_ID = '{0}' AND GEODIN_SYS_PRJDEFS.OBJ_DESC = 'LOCQUERY' """.format(item_prj.extraInformation.id, database.owner)
 			result = self.connectToDatabase(database, query)
 			
 			for row in result:
@@ -898,9 +983,9 @@ class GeODinQGISMain(QDockWidget, Ui_GeODinQGISMain):
 		
 		try:
 			query = """SELECT * 
-						FROM GEODIN_QGIS_QUERY 
+						FROM {1}GEODIN_QGIS_QUERY 
 						WHERE GEODIN_QGIS_QUERY.PRJ_ID = '{0}'
-						ORDER BY GEODIN_QGIS_QUERY.QUERY_NAME;""".format(item_prj.extraInformation.id)
+						ORDER BY GEODIN_QGIS_QUERY.QUERY_NAME;""".format(item_prj.extraInformation.id, database.owner)
 			result = self.connectToDatabase(database, query)
 			
 			for row in result:
@@ -933,7 +1018,6 @@ class GeODinQGISMain(QDockWidget, Ui_GeODinQGISMain):
 	def treeMenu(self, position):
 		#right click menu
 		selectedItem = self.treeWidget.itemFromIndex(self.treeWidget.selectedIndexes()[0])
-
 		menu = QMenu()
 		if selectedItem.itemType == DATABASEITEM:
 			openDB = menu.addAction(self.dbicon_open, self.dictionary.getWord(self.lang,"Open database"))
@@ -1022,8 +1106,6 @@ class GeODinQGISMain(QDockWidget, Ui_GeODinQGISMain):
 			
 			if projectItem:
 				e = projectItem.extraInformation.id
-				
-				print "ObjectID: ", e
 				
 				params = "[Params]\nDatabase={0}\nUserName={1}\nPassword={2}\nObjectType=1\nParentNode=ProjectQueries\nQuery={3}\nObjectID={4}\nExpand=false".format(a, b, c, d, e)
 			else:
@@ -1193,7 +1275,6 @@ class GeODinQGISMain(QDockWidget, Ui_GeODinQGISMain):
 		try:
 			result = self.connectToDatabase(database, sqlStatement)
 		except Exception, e:
-			print sqlStatement
 			print str(e[1])
 			return
 
@@ -1229,7 +1310,6 @@ class GeODinQGISMain(QDockWidget, Ui_GeODinQGISMain):
 			#Create a new table in the GeODin database
 			query = """CREATE TABLE GEODIN_QGIS_QUERY (id AUTOINCREMENT PRIMARY KEY, PRJ_ID varchar(6), QUERY_NAME varchar(255) UNIQUE , QUERY longtext);"""
 			database=self.dbs[[db.name for db in self.dbs].index(item.parent().normalString)]
-			print "Database for Query: ", database
 			self.connectToDatabase(database, query, True)
 			query = """INSERT INTO GEODIN_QGIS_QUERY(PRJ_ID, QUERY_NAME, QUERY) values (?, ?, ?);"""
 			#try:
@@ -1334,20 +1414,20 @@ class GeODinQGISMain(QDockWidget, Ui_GeODinQGISMain):
 		self.multipleImportButton.setFont(QFont('OldEnglish', 10))
 
 		if self.crd:
-			self.crd.btn_del.setText(self.dictionary.getWord(self.lang,"Delete Entries"))
-			self.crd.btn_desel.setText(self.dictionary.getWord(self.lang,"Deselect Entries"))
+		#	self.crd.btn_del.setText(self.dictionary.getWord(self.lang,"Delete Entries"))
+		#	self.crd.btn_desel.setText(self.dictionary.getWord(self.lang,"Deselect Entries"))
 			self.crd.btn_close.setText(self.dictionary.getWord(self.lang,"Close"))
 			
 			self.crd.setWindowTitle(self.dictionary.getWord(self.lang,"New object"))
-			self.crd.lbl_obtyp.setText(self.dictionary.getWord(self.lang,"Object type"))
+			# self.crd.lbl_obtyp.setText(self.dictionary.getWord(self.lang,"Object type"))
 
 			self.crd.coord_tab.horizontalHeaderItem(0).setText(self.dictionary.getWord(self.lang,"Easting"))
 			self.crd.coord_tab.horizontalHeaderItem(1).setText(self.dictionary.getWord(self.lang,"Northing"))
 			
 			self.crd.lbl_east.setText(self.dictionary.getWord(self.lang,"Easting"))
 			self.crd.lbl_north.setText(self.dictionary.getWord(self.lang,"Northing"))
-			self.crd.le_east.setPlaceholderText(self.dictionary.getWord(self.lang,"Empty"))
-			self.crd.le_north.setPlaceholderText(self.dictionary.getWord(self.lang,"Empty"))
+#			self.crd.le_east.setPlaceholderText(self.dictionary.getWord(self.lang,"Empty"))
+#			self.crd.le_north.setPlaceholderText(self.dictionary.getWord(self.lang,"Empty"))
 			self.crd.lang = language
 
 		self.config.set('Options', 'lang', language)
@@ -1409,21 +1489,22 @@ class GeODinQGISMain(QDockWidget, Ui_GeODinQGISMain):
 			self.crd = NewObject(self.iface, item.extraInformation.name, item.parent().parent().extraInformation, self.dictionary, self.lang)
 
 			# buttons
-			self.crd.btn_del.setText(self.dictionary.getWord(self.lang,"Delete Entries"))
-			self.crd.btn_desel.setText(self.dictionary.getWord(self.lang,"Deselect Entries"))
+		#	self.crd.btn_del.setText(self.dictionary.getWord(self.lang,"Delete Entries"))
+		#	self.crd.btn_desel.setText(self.dictionary.getWord(self.lang,"Deselect Entries"))
 			self.crd.btn_close.setText(self.dictionary.getWord(self.lang,"Close"))
 			
 			# labels and tables
 			self.crd.setWindowTitle(self.dictionary.getWord(self.lang,"New object"))
-			self.crd.lbl_obtyp.setText(self.dictionary.getWord(self.lang,"Object type"))
+			# self.crd.lbl_obtyp.setText(self.dictionary.getWord(self.lang,"Object type"))
 			
-			self.crd.coord_tab.horizontalHeaderItem(0).setText(self.dictionary.getWord(self.lang,"Easting"))
-			self.crd.coord_tab.horizontalHeaderItem(1).setText(self.dictionary.getWord(self.lang,"Northing"))
+			self.crd.coord_tab.horizontalHeaderItem(0).setText(self.dictionary.getWord(self.lang,"Short name"))
+			self.crd.coord_tab.horizontalHeaderItem(1).setText(self.dictionary.getWord(self.lang,"Easting"))
+			self.crd.coord_tab.horizontalHeaderItem(2).setText(self.dictionary.getWord(self.lang,"Northing"))
 
 			self.crd.lbl_east.setText(self.dictionary.getWord(self.lang,"Easting"))
 			self.crd.lbl_north.setText(self.dictionary.getWord(self.lang,"Northing"))
-			self.crd.le_east.setPlaceholderText(self.dictionary.getWord(self.lang,"Empty"))
-			self.crd.le_north.setPlaceholderText(self.dictionary.getWord(self.lang,"Empty"))
+#			self.crd.le_east.setPlaceholderText(self.dictionary.getWord(self.lang,"Empty"))
+#			self.crd.le_north.setPlaceholderText(self.dictionary.getWord(self.lang,"Empty"))
 			
 			self.iface.addDockWidget(Qt.RightDockWidgetArea, self.crd)
 			
@@ -1432,8 +1513,8 @@ class GeODinQGISMain(QDockWidget, Ui_GeODinQGISMain):
 		file = []
 		try:
 			query = """SELECT GEODIN_ADC_ADCDATA.ADC_NAME, GEODIN_ADC_ADCDATA.ADC_FILE
-						FROM GEODIN_ADC_ADCDATA
-						WHERE GEODIN_ADC_ADCDATA.ADC_TYPE = 'SHP' """
+						FROM {0}GEODIN_ADC_ADCDATA
+						WHERE GEODIN_ADC_ADCDATA.ADC_TYPE = 'SHP' """.format(database.owner)
 						
 			result = self.connectToDatabase(database, query)
 
@@ -1443,10 +1524,10 @@ class GeODinQGISMain(QDockWidget, Ui_GeODinQGISMain):
 				file.append(row[1])
 			
 		except SystemError as e:
-			self.lgr.error('path={0}, error={1}'.format(database.filepath, str(e[1])))
+			self.lgr.error('path={0}, error={1}'.format(database.filepath, str(e)))
 			pass	
 		except Exception,e:
-			self.lgr.error('path={0}, error={1}'.format(database.filepath, str(e[1])))
+			self.lgr.error('path={0}, error={1}'.format(database.filepath, str(e)))
 			pass
 		return name, file
 
@@ -1454,8 +1535,8 @@ class GeODinQGISMain(QDockWidget, Ui_GeODinQGISMain):
 		name = []
 		try:
 			query = """SELECT GEODIN_SYS_PRJDEFS.OBJ_NAME
-						FROM GEODIN_SYS_PRJDEFS
-						WHERE GEODIN_SYS_PRJDEFS.PRJ_ID = 'DBDEF' AND GEODIN_SYS_PRJDEFS.OBJ_DESC = 'LOCQUERY' """
+						FROM {0}GEODIN_SYS_PRJDEFS
+						WHERE GEODIN_SYS_PRJDEFS.PRJ_ID = 'DBDEF' AND GEODIN_SYS_PRJDEFS.OBJ_DESC = 'LOCQUERY' """.format(database.owner)
 						
 			result = self.connectToDatabase(database, query)
 			
@@ -1471,7 +1552,6 @@ class GeODinQGISMain(QDockWidget, Ui_GeODinQGISMain):
 		
 	def connectToDatabase(self, database, query, create = False, param=None):
 		result = []
-		print "Database for Connection: ", database
 		if not len(database.options.keys()) or database.options["connection"] == "ODBC":
 			if 'pyodbc' in sys.modules.keys():
 				connection = pyodbc.connect("Driver={Microsoft Access Driver (*.mdb, *.accdb)};DBQ="+database.filepath+";")
@@ -1605,6 +1685,7 @@ class GeODinQGISMain(QDockWidget, Ui_GeODinQGISMain):
 		self.inProcess = True
 		try:
 			selectedTreeItems = self.treeWidget.selectedItems()
+			
 			allLayers = self.iface.mapCanvas().layers()
 			for layer in allLayers:
 				selectFeatures = []
@@ -1639,43 +1720,47 @@ class GeODinQGISMain(QDockWidget, Ui_GeODinQGISMain):
 		
 		###selection are the features of all layers
 		selection = []
-		for layer in self.iface.mapCanvas().layers():
-			selection+= layer.selectedFeatures()
 		
-		for feature in selection:
-			try:
-				if feature["database"] in database_paths:
-					try:
-						db = self.dbs[database_paths.index(feature["database"])]
-						#search and expand for top level item with database alias as text
-						databaseItem = self.treeWidget.findItems(db.name, Qt.MatchExactly)[0]
-						if databaseItem.childCount() == 0:
-							self.buildTree(databaseItem)
-						databaseItem.setExpanded(True)
-					
-						#search and expand project item 
-						projectItem = searchItem(databaseItem, feature["prjid"])
-						if projectItem.childCount() == 0:
-							self.buildTree(projectItem)
-						projectItem.setExpanded(True)
-					
-						#search and expand objects item
-						objectsItem = searchItem(projectItem, "Objects")
-						objectsItem.setExpanded(True)
-
-						#search and expand object type item
-						objectTypeItem = searchItem(objectsItem, feature["objecttype"])
-						objectTypeItem.setExpanded(True)
-
-						#search and select item
-						selectItem = searchItem(objectTypeItem, feature["invid"])
-						selectTreeItems.append(selectItem)
-					except Exception,e:
-						print str(e)
-						continue
+		try:
+			for layer in self.iface.mapCanvas().layers():
+				selection+= layer.selectedFeatures()
 			
-			except KeyError:
-				continue
+			for feature in selection:
+				try:
+					if feature["database"] in database_paths:
+						try:
+							db = self.dbs[database_paths.index(feature["database"])]
+							#search and expand for top level item with database alias as text
+							databaseItem = self.treeWidget.findItems(db.name, Qt.MatchExactly)[0]
+							if databaseItem.childCount() == 0:
+								self.buildTree(databaseItem)
+							databaseItem.setExpanded(True)
+						
+							#search and expand project item 
+							projectItem = searchItem(databaseItem, feature["prjid"])
+							if projectItem.childCount() == 0:
+								self.buildTree(projectItem)
+							projectItem.setExpanded(True)
+						
+							#search and expand objects item
+							objectsItem = searchItem(projectItem, "Objects")
+							objectsItem.setExpanded(True)
+
+							#search and expand object type item
+							objectTypeItem = searchItem(objectsItem, feature["objecttype"])
+							objectTypeItem.setExpanded(True)
+
+							#search and select item
+							selectItem = searchItem(objectTypeItem, feature["invid"])
+							selectTreeItems.append(selectItem)
+						except Exception,e:
+							print str(e)
+							continue
+				
+				except KeyError:
+					continue
+		except:
+			return
 		
 		try:
 			for item in selectedTreeItems:
@@ -1698,3 +1783,48 @@ class GeODinQGISMain(QDockWidget, Ui_GeODinQGISMain):
 		except Exception,e:
 			print str(e)
 			QApplication.restoreOverrideCursor()
+			
+	def readGeodinini(self):
+		geodin_path = self.getGeodinPath()
+		geodin_ini = ''
+		for file in os.listdir(geodin_path):
+			if file.lower() == 'geodin.ini':
+				geodin_ini = os.path.join(geodin_path, file)
+		inidict = {}
+		section=''
+		lines = []
+		with open(geodin_ini, 'r') as f:
+			lines = f.read().split('\n')
+		f.closed	
+
+		for line in lines:
+			if (line.startswith(';')):
+				next
+			elif (line.startswith('[')):
+				line = line.replace('[','').replace(']','')
+				section = line
+				inidict[section] = {}
+			elif len(line):
+				
+				inidict[section][line[0:line.index('=')]] = line[line.index('=')+1:]
+		for db in inidict['SystemDatabases'].keys():
+			database = Database()
+			database.name = inidict['SystemDatabases'][db]
+			options = None
+			path = None
+			owner = ''
+			for o in inidict[inidict['SystemDatabases'][db]].keys():
+				
+				if (o.lower() == 'adoconnection'):
+					options, path =  self.getConnectionOptions(inidict[inidict['SystemDatabases'][db]][o], 'ADOConnection', inidict['SystemDatabases'][db])
+				elif (o.lower() == 'firedacconnection'):
+					options, path =  self.getConnectionOptions(inidict[inidict['SystemDatabases'][db]][o], 'FireDACConnection', inidict['SystemDatabases'][db])
+				elif (o.lower() == 'owner'):
+					owner = inidict[inidict['SystemDatabases'][db]][o] + '.'
+			
+			#print database, options
+			database.filepath = path
+			database.options = options
+			database.owner = owner
+			if path not in [db.filepath for db in self.dbs]:
+				self.newTopLevelItem(database)

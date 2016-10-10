@@ -2,8 +2,7 @@
 
 # Form implementation generated from reading ui file 'ui_Files\ui_GeODinQGIS_DragShp.ui'
 #
-# Created: Thu Sep 24 16:29:40 2015
-#      by: PyQt4 UI code generator 4.11.3
+# Created by: PyQt4 UI code generator 4.11.4
 #
 # WARNING! All changes made in this file will be lost!
 

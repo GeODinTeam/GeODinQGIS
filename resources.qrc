@@ -1,6 +1,7 @@
 <RCC>
     <qresource prefix="/plugins/GeODinQGIS" >
 		<file>icons/logo.png</file>
+		<file>icons/delete.png</file>
 		<file>icons/i_484F.png</file>
         <file>icons/i_099F.png</file>
 		<file>icons/i_126F.png</file>
@@ -30,5 +31,6 @@
 		<file>icons/settings.png</file>
 		<file>icons/info.png</file>
 		<file>icons/fugro.png</file>
+		<file>icons/minus.png</file>
     </qresource>
 </RCC>

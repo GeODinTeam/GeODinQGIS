@@ -29,11 +29,34 @@
    <property name="acceptDrops">
     <bool>false</bool>
    </property>
+   <widget class="QLabel" name="lbl_obtyp">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>10</y>
+      <width>80</width>
+      <height>25</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <family>MS Shell Dlg 2</family>
+      <pointsize>8</pointsize>
+      <kerning>true</kerning>
+     </font>
+    </property>
+    <property name="frameShape">
+     <enum>QFrame::Box</enum>
+    </property>
+    <property name="text">
+     <string>Object type</string>
+    </property>
+   </widget>
    <widget class="QPushButton" name="btn_close">
     <property name="geometry">
      <rect>
       <x>260</x>
-      <y>300</y>
+      <y>200</y>
       <width>125</width>
       <height>23</height>
      </rect>
@@ -42,13 +65,39 @@
      <string>Close</string>
     </property>
    </widget>
+   <widget class="QPushButton" name="btn_ok">
+    <property name="geometry">
+     <rect>
+      <x>260</x>
+      <y>170</y>
+      <width>125</width>
+      <height>23</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>GeODin</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="btn_del">
+    <property name="geometry">
+     <rect>
+      <x>260</x>
+      <y>110</y>
+      <width>125</width>
+      <height>23</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Delete Selected</string>
+    </property>
+   </widget>
    <widget class="QTableWidget" name="coord_tab">
     <property name="geometry">
      <rect>
       <x>10</x>
-      <y>69</y>
-      <width>375</width>
-      <height>221</height>
+      <y>79</y>
+      <width>244</width>
+      <height>201</height>
      </rect>
     </property>
     <property name="verticalScrollBarPolicy">
@@ -70,7 +119,7 @@
      <enum>QAbstractItemView::SelectRows</enum>
     </property>
     <property name="columnCount">
-     <number>3</number>
+     <number>2</number>
     </property>
     <attribute name="horizontalHeaderDefaultSectionSize">
      <number>100</number>
@@ -78,11 +127,6 @@
     <attribute name="verticalHeaderDefaultSectionSize">
      <number>28</number>
     </attribute>
-    <column>
-     <property name="text">
-      <string>Short name</string>
-     </property>
-    </column>
     <column>
      <property name="text">
       <string>Easting</string>
@@ -94,11 +138,115 @@
      </property>
     </column>
    </widget>
-   <widget class="QPushButton" name="btn_createshp">
+   <widget class="QLineEdit" name="le_obtyp">
+    <property name="geometry">
+     <rect>
+      <x>105</x>
+      <y>10</y>
+      <width>280</width>
+      <height>25</height>
+     </rect>
+    </property>
+    <property name="acceptDrops">
+     <bool>false</bool>
+    </property>
+   </widget>
+   <widget class="QLabel" name="lbl_east">
     <property name="geometry">
      <rect>
       <x>10</x>
-      <y>300</y>
+      <y>40</y>
+      <width>80</width>
+      <height>25</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <family>MS Shell Dlg 2</family>
+      <pointsize>8</pointsize>
+      <kerning>true</kerning>
+     </font>
+    </property>
+    <property name="frameShape">
+     <enum>QFrame::Box</enum>
+    </property>
+    <property name="text">
+     <string>Easting</string>
+    </property>
+   </widget>
+   <widget class="QLineEdit" name="le_east">
+    <property name="geometry">
+     <rect>
+      <x>105</x>
+      <y>40</y>
+      <width>87</width>
+      <height>25</height>
+     </rect>
+    </property>
+    <property name="acceptDrops">
+     <bool>false</bool>
+    </property>
+    <property name="placeholderText">
+     <string>Empty</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="lbl_north">
+    <property name="geometry">
+     <rect>
+      <x>206</x>
+      <y>40</y>
+      <width>80</width>
+      <height>25</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <family>MS Shell Dlg 2</family>
+      <pointsize>8</pointsize>
+      <kerning>true</kerning>
+     </font>
+    </property>
+    <property name="frameShape">
+     <enum>QFrame::Box</enum>
+    </property>
+    <property name="text">
+     <string>Northing</string>
+    </property>
+   </widget>
+   <widget class="QLineEdit" name="le_north">
+    <property name="geometry">
+     <rect>
+      <x>298</x>
+      <y>40</y>
+      <width>87</width>
+      <height>25</height>
+     </rect>
+    </property>
+    <property name="acceptDrops">
+     <bool>false</bool>
+    </property>
+    <property name="placeholderText">
+     <string>Empty</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="btn_desel">
+    <property name="geometry">
+     <rect>
+      <x>260</x>
+      <y>140</y>
+      <width>125</width>
+      <height>23</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Deselect</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="btn_createshp">
+    <property name="geometry">
+     <rect>
+      <x>260</x>
+      <y>80</y>
       <width>25</width>
       <height>25</height>
      </rect>
@@ -113,8 +261,8 @@
    <widget class="QPushButton" name="btn_openshp">
     <property name="geometry">
      <rect>
-      <x>40</x>
-      <y>300</y>
+      <x>290</x>
+      <y>80</y>
       <width>25</width>
       <height>25</height>
      </rect>
@@ -129,8 +277,8 @@
    <widget class="QPushButton" name="btn_dragshp">
     <property name="geometry">
      <rect>
-      <x>70</x>
-      <y>300</y>
+      <x>320</x>
+      <y>80</y>
       <width>25</width>
       <height>25</height>
      </rect>
@@ -140,123 +288,6 @@
     </property>
     <property name="checkable">
      <bool>false</bool>
-    </property>
-   </widget>
-   <widget class="QPushButton" name="btn_del">
-    <property name="geometry">
-     <rect>
-      <x>100</x>
-      <y>300</y>
-      <width>25</width>
-      <height>25</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string/>
-    </property>
-    <property name="checkable">
-     <bool>false</bool>
-    </property>
-   </widget>
-   <widget class="QPushButton" name="btn_desel">
-    <property name="geometry">
-     <rect>
-      <x>130</x>
-      <y>300</y>
-      <width>25</width>
-      <height>25</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string/>
-    </property>
-    <property name="checkable">
-     <bool>false</bool>
-    </property>
-   </widget>
-   <widget class="QPushButton" name="btn_geodin">
-    <property name="geometry">
-     <rect>
-      <x>160</x>
-      <y>300</y>
-      <width>25</width>
-      <height>25</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string/>
-    </property>
-    <property name="checkable">
-     <bool>false</bool>
-    </property>
-   </widget>
-   <widget class="QComboBox" name="cmb_short">
-    <property name="geometry">
-     <rect>
-      <x>100</x>
-      <y>5</y>
-      <width>285</width>
-      <height>22</height>
-     </rect>
-    </property>
-   </widget>
-   <widget class="QLabel" name="lbl_short">
-    <property name="geometry">
-     <rect>
-      <x>10</x>
-      <y>10</y>
-      <width>91</width>
-      <height>16</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>Short name</string>
-    </property>
-   </widget>
-   <widget class="QLabel" name="lbl_east">
-    <property name="geometry">
-     <rect>
-      <x>10</x>
-      <y>40</y>
-      <width>91</width>
-      <height>16</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>Easting</string>
-    </property>
-   </widget>
-   <widget class="QLabel" name="lbl_north">
-    <property name="geometry">
-     <rect>
-      <x>220</x>
-      <y>40</y>
-      <width>91</width>
-      <height>16</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>Northing</string>
-    </property>
-   </widget>
-   <widget class="QComboBox" name="cmb_east">
-    <property name="geometry">
-     <rect>
-      <x>100</x>
-      <y>40</y>
-      <width>100</width>
-      <height>22</height>
-     </rect>
-    </property>
-   </widget>
-   <widget class="QComboBox" name="cmb_north">
-    <property name="geometry">
-     <rect>
-      <x>285</x>
-      <y>40</y>
-      <width>100</width>
-      <height>22</height>
-     </rect>
     </property>
    </widget>
   </widget>

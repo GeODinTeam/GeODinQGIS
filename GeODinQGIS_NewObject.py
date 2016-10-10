@@ -39,6 +39,7 @@ class NewObject(QDockWidget, Ui_NewObject):
 		self.y_list = []
 		self.id_list = []
 		self.rows = []
+		self.attrs_list = []
 		
 		# reference to the map canvas
 		self.canvas = self.iface.mapCanvas()
@@ -53,20 +54,28 @@ class NewObject(QDockWidget, Ui_NewObject):
 		self.drag = False
 		
 		#self.btn_dragshp.setEnabled(False)
-		self.btn_ok.setEnabled(False)
+		self.btn_geodin.setEnabled(False)
 		self.btn_del.setEnabled(False)
 		self.btn_desel.setEnabled(False)
+		self.cmb_short.setEnabled(True)
 		
 		# connect buttons to their functions
-		QObject.connect(self.btn_ok, SIGNAL("clicked()"),self.geodin)
+		QObject.connect(self.btn_geodin, SIGNAL("clicked()"),self.geodin)
 		QObject.connect(self.btn_close, SIGNAL("clicked()"),self, SLOT("close()"))
 		QObject.connect(self.btn_del, SIGNAL("clicked()"), self.delete)
 		QObject.connect(self.btn_desel, SIGNAL("clicked()"), self.deselect)
+		QObject.connect(self.cmb_short, SIGNAL("currentIndexChanged (const QString&)"), self.insertItem)
 		
 		# manage button icons		
 		self.btn_createshp.setIcon(QIcon(":\plugins\GeODinQGIS\icons\point_create_n.png"))
 		self.btn_openshp.setIcon(QIcon(":\plugins\GeODinQGIS\icons\point_add_n.png"))
 		self.btn_dragshp.setIcon(QIcon(":\plugins\GeODinQGIS\icons\point_drag_n.png"))
+		self.btn_del.setIcon(QIcon(":\plugins\GeODinQGIS\icons\delete.png"))
+		self.btn_geodin.setIcon(QIcon(":\plugins\GeODinQGIS\icons\logo.png"))
+		self.btn_desel.setIcon(QIcon(":\plugins\GeODinQGIS\icons\minus.png"))
+		self.btn_del.setIconSize(QSize(24, 24))
+		self.btn_geodin.setIconSize(QSize(24, 24))
+		self.btn_desel.setIconSize(QSize(24, 24))
 		self.btn_createshp.setIconSize(QSize(24, 24))
 		self.btn_openshp.setIconSize(QSize(24, 24))
 		self.btn_dragshp.setIconSize(QSize(24, 24))
@@ -79,12 +88,12 @@ class NewObject(QDockWidget, Ui_NewObject):
 		self.btn_openshp.setToolTip(loadshp)
 		self.btn_dragshp.setToolTip(dragshp)
 		
-		# set headers for child nodes
-		if self.obj_type == "All Objects":
-			self.le_obtyp.setText("All Objects")
+		# # set headers for child nodes
+		# if self.obj_type == "All Objects":
+			# self.le_obtyp.setText("All Objects")
 
-		else:
-			self.le_obtyp.setText(self.obj_type)
+		# else:
+			# self.le_obtyp.setText(self.obj_type)
 		
 		self.delete = False
 		
@@ -125,6 +134,8 @@ class NewObject(QDockWidget, Ui_NewObject):
 			
 	def Started(self):
 		# if editing mode has been toggled on
+		
+		self.cmb_short.setEnabled(False)
 		# table cell is only editable if has been double clicked
 		self.coord_tab.setEditTriggers(QAbstractItemView.DoubleClicked)
 		
@@ -136,26 +147,47 @@ class NewObject(QDockWidget, Ui_NewObject):
 		# turn edit triggers and deletion off
 		self.coord_tab.setEditTriggers(QAbstractItemView.NoEditTriggers)
 		self.btn_del.setEnabled(False)
-		
+		self.cmb_short.setEnabled(True)
+	
+		if len(self.cmb_short.currentText()) > 0:
+			shortname = self.cmb_short.currentText()
+		else:
+			shortname = None
+			
+		if len(self.cmb_east.currentText()) > 0:
+			easting = self.cmb_east.currentText()
+		else:
+			easting = None	
+
+		if len(self.cmb_north.currentText()) > 0:
+			northing = self.cmb_north.currentText()
+		else:
+			northing = None				
+	
 		# read attribute table and insert items into coordinate table
-		self.insertItem()
+		self.insertItem(shortname, easting, northing)
 		
 		self.v_points.updateFields()
 		
 	def Changed(self, item):
 		# if item has been changed in coordinate table
 		# editing mode is required
+		# print self.coord_tab.currentColumn()
+		# print self.coord_tab.currentRow()
 		if self.v_points.isEditable():
+			# print self.coord_tab.currentItem()
+			# print self.coord_tab.currentColumn()
+			# print self.coord_tab.currentRow()
 			# coordinate which has been edited (only one at a time)
 			coord_edit = float(self.coord_tab.currentItem().text())
 			
-			# change coordinate euqals "coord_edit"
-			if self.coord_tab.currentColumn() == 0:
+			# change coordinate equals "coord_edit"
+			if self.coord_tab.currentColumn() == 1:
 				x = coord_edit
-				y = float(self.coord_tab.item(self.rows[0],1).text())
+				y = float(self.coord_tab.item(self.rows[0],2).text())
 			
-			elif self.coord_tab.currentColumn() == 1:
-				x = float(self.coord_tab.item(self.rows[0],0).text())
+			elif self.coord_tab.currentColumn() == 2:
+				x = float(self.coord_tab.item(self.rows[0],1).text())
 				y = coord_edit
 			
 			# QGIS internal functions
@@ -167,8 +199,8 @@ class NewObject(QDockWidget, Ui_NewObject):
 		self.delete = True
 		
 		# delete entries from coordinate list and from temporary shape file
-		self.le_east.clear()
-		self.le_north.clear()
+	#	self.le_east.clear()
+	#	self.le_north.clear()
 		self.rows.sort(reverse=False)
 		
 		# map over vector layer and get attributes
@@ -245,7 +277,21 @@ class NewObject(QDockWidget, Ui_NewObject):
 		
 		# execute if layer has been removed
 		self.root.removedChildren.connect(self.onremovedChildren)
-			
+
+		# select short name, easting and northing from attribute table
+		self.cmb_short.clear()
+		self.cmb_east.clear()
+		self.cmb_north.clear()
+		
+		self.cmb_short.addItem("")	
+		self.cmb_east.addItem("")	
+		self.cmb_north.addItem("")	
+		
+		for field in self.v_points.pendingFields():		
+			self.cmb_short.addItem(field.name())
+			self.cmb_east.addItem(field.name())
+			self.cmb_north.addItem(field.name())			
+		
 		# fill coordinate table and update attribute table
 		self.insertItem()
 		
@@ -308,14 +354,16 @@ class NewObject(QDockWidget, Ui_NewObject):
 		self.v_points.editingStarted.connect(self.Started)
 		self.v_points.editingStopped.connect(self.Stopped)
 		
-	def insertItem(self):
+	def insertItem(self, shortname = None, easting = None, northing = None):
 		# create empty coordinate and ID lists
 		self.x_list = []
 		self.y_list = []
 		self.id_list = []
+		self.short_list = []
 		
 		# touch vector file and get feature information
 		features = self.v_points.getFeatures()
+		fields = self.v_points.pendingFields()
 		
 		# map over features (row in attribute table, object/point in canvas)
 		for f in features:
@@ -325,26 +373,44 @@ class NewObject(QDockWidget, Ui_NewObject):
 			# get feature coordinates from the map
 			x = str(round(geom.asPoint().x(), self.dp))
 			y = str(round(geom.asPoint().y(), self.dp))
+			attrs = f.attributes()
+#			a = attrs[1]
 			
 			# build lists with feature information
 			self.x_list.append(x)
 			self.y_list.append(y)
 			self.id_list.append(fid)
 
+			# short name is None, if nothing was selected, 1st column will be empty
+			# if short name exists, append to list to write into table
+			if shortname:
+				self.short_list.append(f[shortname])
+			else:
+				self.short_list.append("")
+				
+		if easting:
+			for index, field in enumerate(fields):
+				if field.name() == easting:
+					count_east 
+
 		self.coord_tab.setRowCount(len(self.x_list))
-			
+
+		# insert short name into table
+		for i, row in enumerate(self.short_list):
+			short_input = QTableWidgetItem(row)
+			self.coord_tab.setItem(i, 0, short_input)
+		
 		# insert x-coordinate into table
 		for j, row in enumerate(self.x_list):
 			x_input = QTableWidgetItem(row)
-			print type(x_input)
-			self.coord_tab.setItem(j, 0, x_input)
+			self.coord_tab.setItem(j, 1, x_input)
 			
 		# insert y-coordinate into table
 		for k, row in enumerate(self.y_list):
 			y_input = QTableWidgetItem(row)
-			self.coord_tab.setItem(k, 1, y_input)
+			self.coord_tab.setItem(k, 2, y_input)
 		
-		# touch vector file again
+		# touch vector file again and update attribute table
 		# important if information had been changed in coordinate table
 		# need to be in editing mode
 		features = self.v_points.getFeatures()
@@ -354,11 +420,9 @@ class NewObject(QDockWidget, Ui_NewObject):
 			fid = f.id()
 			
 			# get coordinates from coordinate table
-			x = self.coord_tab.item(i,0).text()
-			y = self.coord_tab.item(i,1).text()
-			
-			print type(x)
-			
+			x = self.coord_tab.item(i,1).text()
+			y = self.coord_tab.item(i,2).text()
+
 			# enter information into attribute table
 			if caps & QgsVectorDataProvider.ChangeAttributeValues:
 				attrs = { 3 : x, 4 : y, 5 : self.dbtype, 6 : self.path, 7 : self.project_names, 8 : self.proj_ID, 9 : self.obj_type }
@@ -388,15 +452,16 @@ class NewObject(QDockWidget, Ui_NewObject):
 		self.rows.sort(reverse=True)
 
 		if len(self.rows) == 1:
-			self.btn_ok.setEnabled(True)
+			self.btn_geodin.setEnabled(True)
 		
 		self.sel_x = []
 		self.sel_y = []
 		self.sel_id = []
+		self.sel_attrs = []
 
 		# get coordinates from selection
-		self.coord_x = self.coord_tab.item(self.rows[0],0).text()
-		self.coord_y = self.coord_tab.item(self.rows[0],1).text()		
+		self.coord_x = self.coord_tab.item(self.rows[0],1).text()
+		self.coord_y = self.coord_tab.item(self.rows[0],2).text()		
 		
 		for i in self.rows:
 			id = self.id_list[i]
@@ -406,26 +471,27 @@ class NewObject(QDockWidget, Ui_NewObject):
 			y_coord = self.y_list[i]
 			self.sel_y.append(y_coord)
 		
-		self.le_east.clear()
-		self.le_north.clear()	
+	#	self.le_east.clear()
+	#	self.le_north.clear()	
 
-		self.le_east.insert(self.coord_x)
-		self.le_north.insert(self.coord_y)
+	#	self.le_east.insert(self.coord_x)
+	#	self.le_north.insert(self.coord_y)
 		
 		if len(self.rows) != 1:
-			self.le_east.clear()
-			self.le_north.clear()
-			self.btn_ok.setEnabled(False)
+		#	self.le_east.clear()
+		#	self.le_north.clear()
+			self.btn_geodin.setEnabled(False)
 		
 	def geodin(self):
 		#self.lgr.warning('GeODin COM')
 		# connect to GeODin COM functions
 		GeODin = win32com.client.Dispatch("GeODin.GeODinApplication")
 		
-		x = self.le_east.text()
-		y = self.le_north.text()
+	#	x = self.le_east.text()
+	#	y = self.le_north.text()
+		short = "B101"
 
-		if len(x) ==0:
+		if len(self.coord_x) ==0:
 			QMessageBox.information(None,self.new_dict.getWord(self.lang,"Selection Error"),self.new_dict.getWord(self.lang,"Nothing to read. Please select the row to be written into GeODin."))
 		
 		else:
@@ -446,12 +512,13 @@ class NewObject(QDockWidget, Ui_NewObject):
 			
 			# set parameters to create a new object
 			Params = "[Params]\n"
-			FieldValues = "ApplyFieldValues=True"
+			ApplyFieldValues = "ApplyFieldValues=True"
 			XCOORDS = "\nXCOORD="
 			YCOORDS = "\nYCOORD="
 			PRJID = "\nPRJID="
+			FieldValueSection = "[FieldValues]\n"
 
-			params = Params + FieldValues + XCOORDS + x + YCOORDS + y + PRJID + self.proj_ID
+			params = Params + ApplyFieldValues + XCOORDS + self.coord_x + YCOORDS + self.coord_y + PRJID + self.proj_ID + FieldValueSection + short
 			#self.lgr.warning(params)
 			# execute method to create new object
 			error = GeODin.ExecuteMethodParams(39,params)
@@ -468,7 +535,7 @@ class NewObject(QDockWidget, Ui_NewObject):
 		self.rows = []
 		self.sel_x = []
 		self.sel_y = []
-		self.le_east.clear()
-		self.le_north.clear()
+	#	self.le_east.clear()
+	#	self.le_north.clear()
 		
 		self.btn_desel.setEnabled(False)

@@ -44,7 +44,7 @@ class DisplayLayout(QDialog):
 		removeLabel = QLabel(self)
 		removeLabel.setMinimumSize(QSize(23, 23))
 		removeLabel.setMaximumSize(QSize(23, 23))
-		removeLabel.setPixmap(QPixmap(self.main.pluginDirectory+"/icons/removeLayout.png"))
+		removeLabel.setPixmap(QPixmap(self.main.pluginDirectory+"/icons/remove.png"))
 		
 		addLayout = QHBoxLayout()
 		addLayout.setSizeConstraint(QLayout.SetFixedSize)
@@ -99,12 +99,15 @@ class DisplayLayout(QDialog):
 
 		GeODin = win32com.client.Dispatch("GeODin.GeODinApplication")
 		info = GeODin.LicenceInfo.split('\r\n')
+		#print "Licence Info: ", info
+		
 		dongle = [t for t in info if 'Dongle' in t][0].split(': ')[1]
 		m = md5.new()
 		m.update(a+'-'+dongle)
 		new_hash = m.hexdigest()
 		selected = self.layoutsList.selectedItems()
-		layout = self.folderpath + '\\' + str(selected[0].text())
+		#layout = self.folderpath + '\\' + str(selected[0].text())
+		layout = self.folderpath + '\\' + selected[0].text()
 		database = self.object.parent.parent
 		invid = self.object.invid
 		image = 41
@@ -136,7 +139,11 @@ class DisplayLayout(QDialog):
 			print "Error Message:"+GeODin.ExceptionMsg
 			
 		f = open(self.tmp + "\\out.pdf", 'wb')
-		f.write(pic[0])
+		if isinstance(pic[0], unicode):
+			f.write(pic[0].encode('utf-8'))
+		else:
+			f.write(pic[0])
+		#f.write(pic[0])
 		f.close()
 
 		GeODin = None
@@ -154,8 +161,8 @@ class DisplayLayout(QDialog):
 		path_data = str(self.main.config.get('Options', 'programdata'))
 		# get layout directory
 		directory = QFileDialog.getExistingDirectory(self, "Select Directory", path_data)
-		print type(directory)
-		print directory
+		#print type(directory)
+		#print directory
 #		directory = directory.encode('utf-8')
 		
 		# if layout directory has been specified
