@@ -32,5 +32,6 @@
 		<file>icons/info.png</file>
 		<file>icons/fugro.png</file>
 		<file>icons/minus.png</file>
+		<file>icons/flag_poland.png</file>
     </qresource>
 </RCC>

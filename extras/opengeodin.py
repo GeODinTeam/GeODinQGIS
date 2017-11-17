@@ -34,7 +34,7 @@ class GeODinFromObject:
 #			self.database = self.project
 
 		self.GeODin = win32com.client.Dispatch("GeODin.GeODinApplication")
-		
+		#print dir(self.GeODin.Method())
 		self.geodin()
 		
 	def geodin(self):
@@ -53,6 +53,7 @@ class GeODinFromObject:
 		Expand = "\nExpand=true"
 		
 		params = Params + Database + self.alias + Username + Password + Objecttype + Parentnode + Object_ID + self.item.invid + Expand
+
 		#self.lgr.warning(params)
 		# execute method
 		self.GeODin.SelectObject(params)	

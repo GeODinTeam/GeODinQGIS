@@ -56,7 +56,7 @@ class GeODinQGIS:
 		if self.main.error:
 			return
 		# Create actionmain that will start plugin configuration
-		self.actionmain = QAction(QIcon(":\plugins\GeODinQGIS\icons\logo.png"), u"Main", self.iface.mainWindow())
+		self.actionmain = QAction(QIcon(":/plugins/GeODinQGIS/icons/logo.png"), u"GeODin", self.iface.mainWindow())
 		
 		# connect the actionmain to the run method
 		QObject.connect(self.actionmain, SIGNAL("triggered()"), self.openMain)
@@ -66,10 +66,11 @@ class GeODinQGIS:
 		self.toolBar.addAction(self.actionmain)
 		
 		# manage language icons
-		lang_en = QAction(QIcon(":\plugins\GeODinQGIS\icons\i_371F.png"), u"English", self.toolBar)
-		lang_de = QAction(QIcon(":\plugins\GeODinQGIS\icons\i_370F.png"), u"Deutsch", self.toolBar)
-		lang_fr = QAction(QIcon(":\plugins\GeODinQGIS\icons\i_372F.png"), u"Fran\u00E7ais", self.toolBar)
-		lang_ru = QAction(QIcon(":\plugins\GeODinQGIS\icons\i_373F.png"), u"русский", self.toolBar)
+		lang_en = QAction(QIcon(":/plugins/GeODinQGIS/icons/i_371F.png"), u"English", self.toolBar)
+		lang_de = QAction(QIcon(":/plugins/GeODinQGIS/icons/i_370F.png"), u"Deutsch", self.toolBar)
+		lang_fr = QAction(QIcon(":/plugins/GeODinQGIS/icons/i_372F.png"), u"Fran\u00E7ais", self.toolBar)
+		lang_ru = QAction(QIcon(":/plugins/GeODinQGIS/icons/i_373F.png"), u"русский", self.toolBar)
+		lang_po = QAction(QIcon(":/plugins/GeODinQGIS/icons/flag_poland.png"), u"Polski", self.toolBar)
 		
 		# manage menu to set operating language
 		self.languageMenu = QMenu(self.dictionary.getWord(self.language,"Language"), self.toolBar )
@@ -78,39 +79,45 @@ class GeODinQGIS:
 		self.languageMenu.addAction( lang_de )
 		self.languageMenu.addAction( lang_fr )
 		self.languageMenu.addAction( lang_ru )
+		self.languageMenu.addAction( lang_po )
 		
 		# french and russian are currently not available
 		lang_fr.setEnabled(False)
 		lang_ru.setEnabled(False)
+		lang_po.setEnabled(False)
 		
 		# enable language change, connect to functions
-		QObject.connect(lang_en, SIGNAL("triggered()"), self.changeToEn)
-		QObject.connect(lang_de, SIGNAL("triggered()"), self.changeToDe)
-		QObject.connect(lang_fr, SIGNAL("triggered()"), self.changeToFr)
-		QObject.connect(lang_ru, SIGNAL("triggered()"), self.changeToRu)
+		QObject.connect(lang_en, SIGNAL("triggered()"), lambda lan="en": self.changeLanguage(lan))
+		QObject.connect(lang_de, SIGNAL("triggered()"), lambda lan="de": self.changeLanguage(lan))
+		QObject.connect(lang_fr, SIGNAL("triggered()"), lambda lan="fr": self.changeLanguage(lan))
+		QObject.connect(lang_ru, SIGNAL("triggered()"), lambda lan="ru": self.changeLanguage(lan))
+		QObject.connect(lang_po, SIGNAL("triggered()"), lambda lan="po": self.changeLanguage(lan))
 		
 		# add settings menu to manage plugin settings and operating language
 		self.preferenceMenu = QMenu(self.toolBar)
 		self.preferenceMenu.addMenu(self.languageMenu)
 		self.preferenceButton = QToolButton()
-		self.preferenceButton.setIcon(QIcon(":\plugins\GeODinQGIS\icons\system_run.png"))
+		self.preferenceButton.setToolTip(self.dictionary.getWord(self.language,"Settings"))
+		self.preferenceButton.setIcon(QIcon(":/plugins/GeODinQGIS/icons/system_run.png"))
 		self.preferenceButton.setMenu(self.preferenceMenu)
 		self.preferenceButton.setPopupMode( QToolButton.InstantPopup)
 		self.toolBar.addWidget(self.preferenceButton)
 		
 		# add layer refresh button
-		self.refreshButton = QAction(QIcon(":\plugins\GeODinQGIS\icons\system_refresh.png"), u"Refresh", self.iface.mainWindow())
+		self.refreshButton = QAction(QIcon(":/plugins/GeODinQGIS/icons/system_refresh.png"), u"Refresh", self.iface.mainWindow())
+		self.refreshButton.setToolTip(self.dictionary.getWord(self.language,"Refresh"))
 		QObject.connect(self.refreshButton, SIGNAL("triggered()"), self.refresh)
 		self.toolBar.addAction(self.refreshButton)
 		
 		# add plugin documentation button
-		self.helpButton = QAction(QIcon(":\plugins\GeODinQGIS\icons\system_help.png"), u"Help", self.iface.mainWindow())
+		self.helpButton = QAction(QIcon(":/plugins/GeODinQGIS/icons/system_help.png"), u"GeODinQGIS Help", self.iface.mainWindow())
+		self.helpButton.setToolTip(self.dictionary.getWord(self.language,"GeODinQGIS Help"))
 		QObject.connect(self.helpButton, SIGNAL("triggered()"), self.openHelp)
 		self.toolBar.addAction(self.helpButton)
 		
 		# add settings button
 		self.settingsButton = QAction(QIcon(""), self.dictionary.getWord(self.language,"Settings"), self.toolBar)
-		self.settingsButton.setIcon(QIcon(":\plugins\GeODinQGIS\icons\settings.png"))
+		self.settingsButton.setIcon(QIcon(":/plugins/GeODinQGIS/icons/settings.png"))
 		self.preferenceMenu.addAction(self.settingsButton)
 		QObject.connect(self.settingsButton, SIGNAL("triggered()"), self.openSettings)
 	
@@ -141,11 +148,11 @@ class GeODinQGIS:
 		
 	def openHelp(self):
 		if self.language == 'en':
-			path = self.plugin_dir + "\help\help_en.pdf"
+			path = self.plugin_dir + "/help/help_en.pdf"
 		elif self.language == 'de':
-			path = self.plugin_dir + "\help\help_de.pdf"
+			path = self.plugin_dir + "/help/help_de.pdf"
 		
-		ImageLayout(path, "GeODinQGIS Help")
+		self.helpDialog = ImageLayout(path, "GeODinQGIS Help")
 
 
 		
@@ -221,35 +228,16 @@ class GeODinQGIS:
 					provider.addFeatures(features)
 					layer.commitChanges()
 		canvas.refresh()
-			
-	def changeToEn(self):
-		# change language to English and set the activeIcon from self.main
-		self.main.changeLang('en')
-		self.language = 'en'
+		
+	def changeLanguage(self, lan):
+		self.main.changeLang(lan)
+		self.language = lan
 		self.languageMenu.setIcon(self.main.activeIcon)
 		self.languageMenu.setTitle(self.dictionary.getWord(self.language,"Language"))
 		self.settingsButton.setText(self.dictionary.getWord(self.language,"Settings"))
-	def changeToDe(self):
-		# change language to German and set the activeIcon from self.main
-		self.main.changeLang('de')
-		self.language = 'de'
-		self.languageMenu.setIcon(self.main.activeIcon)
-		self.languageMenu.setTitle(self.dictionary.getWord(self.language,"Language"))
-		self.settingsButton.setText(self.dictionary.getWord(self.language,"Settings"))
-	def changeToFr(self):
-		# change language to French and set the activeIcon from self.main
-		self.main.changeLang('fr')
-		self.language = 'fr'
-		self.languageMenu.setIcon(self.main.activeIcon)
-		self.languageMenu.setTitle(self.dictionary.getWord(self.language,"Language"))
-		self.settingsButton.setText(self.dictionary.getWord(self.language,"Settings"))
-	def changeToRu(self):
-		# change language to Russian and set the activeIcon from self.main
-		self.main.changeLang('ru')
-		self.language = 'ru'
-		self.languageMenu.setIcon(self.main.activeIcon)
-		self.languageMenu.setTitle(self.dictionary.getWord(self.language,"Language"))
-		self.settingsButton.setText(self.dictionary.getWord(self.language,"Settings"))
+		self.refreshButton.setToolTip(self.dictionary.getWord(self.language,"Refresh"))
+		self.helpButton.setToolTip(self.dictionary.getWord(self.language,"GeODinQGIS Help"))
+		self.preferenceButton.setToolTip(self.dictionary.getWord(self.language,"Settings"))
 
 class HelpObject(QDialog):
 	def __init__(self, page, title):

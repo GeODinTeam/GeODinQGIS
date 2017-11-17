@@ -104,6 +104,7 @@ class Database(DatabaseObjects):
 		DatabaseObjects.__init__(self, name)
 		self.filepath = filepath
 		self.owner = ''
+		self.system = False
 		self.options = {}
 
 		self.projects = []
@@ -175,6 +176,8 @@ class Object(DatabaseObjects):
 		self.invid = ""
 		self.coordinates = ()
 		self.data = {}
+		self.epsg = 0;
+		self.loctype = ""
 		
 	def __eq__(self, other):
 		return self.invid == other
@@ -195,6 +198,7 @@ class ObjectType(DatabaseObjects):
 	def __init__(self, name=None, parent=None):
 		DatabaseObjects.__init__(self, name)
 		self.parent = parent
+		self.gen_desc = ""
 		self.objects = []
 
 class TreeWidgetItem(QTreeWidgetItem):
@@ -304,9 +308,9 @@ class QueryDialog(QDialog):
 		self.buttonBox.button(QDialogButtonBox.Cancel).clicked.connect(self.cancel)
 		
 		layout = QVBoxLayout(self)
-		layout.addWidget(QLabel("Name der Abfrage"))
+		layout.addWidget(QLabel("Query name"))
 		layout.addWidget(self.nameText)
-		layout.addWidget(QLabel("SQL-Befehl"))
+		layout.addWidget(QLabel("SQL-Command"))
 		layout.addWidget(self.queryText)
 		layout.addWidget(self.buttonBox)
 		
@@ -401,7 +405,7 @@ class Info(QDialog):
 		font = QFont()
 		font.setPointSize(16)
 		lbl_title.setFont(font)		
-		lbl_title.setText("GeODin QGIS 1.1.2")
+		lbl_title.setText("GeODin QGIS 1.1.5")
 		
 		# GeODin Icon
 		i_geodin = QLabel(self)

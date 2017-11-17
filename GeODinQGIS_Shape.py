@@ -4,7 +4,7 @@ from PyQt4.QtCore import *
 from PyQt4.QtGui import *
 from qgis.core import *
 from qgis.gui import *
-import sys
+import sys, os
 	
 class ShapeFromPoint:
 
@@ -41,7 +41,8 @@ class ShapeFromPoint:
 								QgsField("DATABASE", QVariant.String),
 								QgsField("PRJNAME", QVariant.String),
 								QgsField("PRJID", QVariant.String),
-								QgsField("OBJECTTYPE", QVariant.String)]
+								QgsField("OBJECTTYPE", QVariant.String),
+								QgsField("EPSG", QVariant.Int)]
 		
 		for key in self.objects[0].data.keys():
 			try:
@@ -59,8 +60,10 @@ class ShapeFromPoint:
 		
 		# add fields to attribute table
 		provider.addAttributes(attributeList)
+		epsg = 0
 
 		for object in self.objects:
+			epsg = object.epsg
 			# add feature
 			feat = QgsFeature()
 			feat.setGeometry( QgsGeometry.fromPoint(QgsPoint(object.coordinates[0], object.coordinates[1])) )
@@ -73,23 +76,50 @@ class ShapeFromPoint:
 							self.database.filepath, 
 							object.parent.name, 
 							object.parent.id, 
-							object.locname]
-
+							object.locname,
+							object.epsg]
 			for key in object.data.keys():
 				attribute.append(object.data[key])
-							
+		
 			feat.setAttributes(attribute)
 			provider.addFeatures([feat])
 
 			# Commit changes
 			vectorLayer.commitChanges()
+		#http://qgis.org/api/2.18/classQgsVectorFileWriter.html#ab566ed2016352c37d9a4a6900614eac2
+		error = ""
+		fileName = displayName.replace('\\','').replace(':','').replace('*','').replace('?','').replace('"','').replace('<','').replace('>','').replace('|','').replace('/','').strip().replace(' ','_')
 		
 		if self.main.config.get("Options", "savelayer") == "True":
-			QgsVectorFileWriter.writeAsVectorFormat(vectorLayer, self.main.tmpDirectory + '\\' + displayName.replace('/','') + '.sqlite', 'CP1250', None, 'SQLite', False, None ,['SPATIALITE=YES',])
-			layer = QgsVectorLayer(self.main.tmpDirectory + '\\' + displayName.replace('/','') + '.sqlite', displayName, "ogr")
-		
+			fileName = os.path.join(self.main.tmpDirectory, fileName+'.sqlite')
+			error = QgsVectorFileWriter.writeAsVectorFormat(vectorLayer, fileName, 'CP1250', QgsCoordinateReferenceSystem(epsg, QgsCoordinateReferenceSystem.EpsgCrsId), 'SpatiaLite', False, None ,['SPATIALITE=YES'])
+			layer = QgsVectorLayer(fileName, displayName, "ogr")
+			layer.setCrs(QgsCoordinateReferenceSystem(epsg, QgsCoordinateReferenceSystem.EpsgCrsId))
 		else:
-			QgsVectorFileWriter.writeAsVectorFormat(vectorLayer, self.main.tmpDirectory + '\\' + displayName.replace('/','') + '.shp', "CP1250", None, "ESRI Shapefile")
-			layer = QgsVectorLayer(self.main.tmpDirectory + '\\' + displayName.replace('/','') + '.shp', displayName, "ogr")
+			fileName = os.path.join(self.main.tmpDirectory, fileName+'.shp')
+			error = QgsVectorFileWriter.writeAsVectorFormat(vectorLayer, fileName, "CP1250", QgsCoordinateReferenceSystem(epsg, QgsCoordinateReferenceSystem.EpsgCrsId), 'ESRI Shapefile')
+			layer = QgsVectorLayer(fileName, displayName, "ogr")
+			layer.setCrs(QgsCoordinateReferenceSystem(epsg, QgsCoordinateReferenceSystem.EpsgCrsId))
 
+		if error == QgsVectorFileWriter.NoError:
+			print "NoError"
+		elif error == QgsVectorFileWriter.ErrDriverNotFound :
+			print "ErrDriverNotFound "
+		elif error == QgsVectorFileWriter.ErrCreateDataSource :
+			print "ErrCreateDataSource "
+		elif error == QgsVectorFileWriter.ErrCreateLayer :
+			print "ErrCreateLayer "
+		elif error == QgsVectorFileWriter.ErrAttributeTypeUnsupported :
+			print "ErrAttributeTypeUnsupported "
+		elif error == QgsVectorFileWriter.ErrAttributeCreationFailed :
+			print "ErrAttributeCreationFailed "
+		elif error == QgsVectorFileWriter.ErrProjection :
+			print "ErrProjection "
+		elif error == QgsVectorFileWriter.ErrFeatureWriteFailed :
+			print "ErrFeatureWriteFailed "
+		elif error == QgsVectorFileWriter.ErrInvalidLayer :
+			print "ErrInvalidLayer "
+		elif error == QgsVectorFileWriter.Canceled :
+			print "Canceled "
+		
 		QgsMapLayerRegistry.instance().addMapLayer(layer)

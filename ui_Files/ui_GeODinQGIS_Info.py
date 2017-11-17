@@ -2,8 +2,7 @@
 
 # Form implementation generated from reading ui file 'ui_Files\ui_GeODinQGIS_Info.ui'
 #
-# Created: Wed Aug 26 12:33:10 2015
-#      by: PyQt4 UI code generator 4.11.3
+# Created by: PyQt4 UI code generator 4.11.4
 #
 # WARNING! All changes made in this file will be lost!
 
@@ -31,7 +30,6 @@ class Ui_InfoDialog(object):
         self.gridLayoutWidget.setGeometry(QtCore.QRect(80, 100, 297, 80))
         self.gridLayoutWidget.setObjectName(_fromUtf8("gridLayoutWidget"))
         self.gridLayout = QtGui.QGridLayout(self.gridLayoutWidget)
-        self.gridLayout.setMargin(0)
         self.gridLayout.setObjectName(_fromUtf8("gridLayout"))
         self.lbl_from = QtGui.QLabel(self.gridLayoutWidget)
         self.lbl_from.setObjectName(_fromUtf8("lbl_from"))

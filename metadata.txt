@@ -8,10 +8,10 @@
 
 [general]
 name=GeODinQGIS
-qgisMinimumVersion=2.0
+qgisMinimumVersion=2.14
 description=This plugin connects GeODin with QGIS
 about=GeODin is an industry standard software for the collection, interpretation and presentation of geo-information. GeODinQGIS is an additional tool for the work with GeODin. It connects GeODin databases with QGIS. Currently supported actions are: creation of new GeODin objects, display GeODin data in QGIS, execute SQL queries, view GeODin layouts.
-version=1.1.2
+version=1.1.5
 author=Fugro Consult GmbH
 email=support@geodin.com
 

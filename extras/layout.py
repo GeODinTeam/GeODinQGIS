@@ -22,8 +22,11 @@ class DisplayLayout(QDialog):
 		self.main = main
 		self.tmp = main.tmpDirectory
 		self.object = object
+		self.folderpath = ""
 		self.layoutList = []
+		self.closed = False
 		self.setWindowTitle('Layout')
+		self.setWindowFlags(Qt.Window)
 		
 		self.resize(650, 500)
 		self.setMinimumSize(QSize(0, 500))
@@ -44,7 +47,7 @@ class DisplayLayout(QDialog):
 		removeLabel = QLabel(self)
 		removeLabel.setMinimumSize(QSize(23, 23))
 		removeLabel.setMaximumSize(QSize(23, 23))
-		removeLabel.setPixmap(QPixmap(self.main.pluginDirectory+"/icons/remove.png"))
+		removeLabel.setPixmap(QPixmap(self.main.pluginDirectory+"/icons/removeLayout.png"))
 		
 		addLayout = QHBoxLayout()
 		addLayout.setSizeConstraint(QLayout.SetFixedSize)
@@ -77,7 +80,7 @@ class DisplayLayout(QDialog):
 		
 		horizontalLayout.addLayout(formLayout)
 
-		buttonBox.button(QDialogButtonBox.Apply).clicked.connect(self.show)
+		buttonBox.button(QDialogButtonBox.Apply).clicked.connect(self.showLayout)
 		buttonBox.button(QDialogButtonBox.Close).clicked.connect(self.cancel)
 		QObject.connect(self.layoutFoldersList, SIGNAL("itemClicked (QTableWidgetItem*)"), self.getLayouts)
 		addLabel.mouseReleaseEvent = self.newFolder
@@ -91,21 +94,41 @@ class DisplayLayout(QDialog):
 			self.layoutFoldersList.setRowCount(self.layoutFoldersList.rowCount()+1)
 			self.layoutFoldersList.setItem(self.layoutFoldersList.rowCount()-1, 0, QTableWidgetItem(l))
 			
-		self.exec_()
+		#self.exec_()
+		self.show()
 
 	def show(self):
+		super(DisplayLayout, self).show()
+		self.closed = False
+		
+	def closeEvent(self, evnt):
+		super(DisplayLayout, self).closeEvent(evnt)
+		self.closed = True
+		
+	def showLayout(self):
+		QApplication.setOverrideCursor(Qt.WaitCursor)
+		selected = self.layoutsList.selectedItems()
+		
+		if not len(self.folderpath) or not len(selected):
+			return
+	
 		now = datetime.datetime.now()
 		a = str(now.year) + str(now.strftime('%m')) + str(now.strftime('%d'))
 
 		GeODin = win32com.client.Dispatch("GeODin.GeODinApplication")
 		info = GeODin.LicenceInfo.split('\r\n')
+		#dongle = [t for t in info if 'dongle' in t.lower()]
+		#print info
+		if not len(info) or not len(info):
+			return
+			
 		#print "Licence Info: ", info
 		
-		dongle = [t for t in info if 'Dongle' in t][0].split(': ')[1]
+		licence = info[1].split(': ')[1]
 		m = md5.new()
-		m.update(a+'-'+dongle)
+		m.update(a+'-'+licence)
 		new_hash = m.hexdigest()
-		selected = self.layoutsList.selectedItems()
+		
 		#layout = self.folderpath + '\\' + str(selected[0].text())
 		layout = self.folderpath + '\\' + selected[0].text()
 		database = self.object.parent.parent
@@ -134,13 +157,14 @@ class DisplayLayout(QDialog):
 		params = Params + exe + Layout + layout + pagenumber + scale + version + ArcGeODin + new_hash + dbName + name + str(database) + username + password + objects + objectID + invid + Image + imageType + str(image) + resolution
 
 		pic = GeODin.ProduceData(params)
+
 		if GeODin.ExceptionValue != 0: 
-			print "Error ID:"+ str(GeODin.ExceptionValue)
-			print "Error Message:"+GeODin.ExceptionMsg
+			print "Error ID: "+ str(GeODin.ExceptionValue)
+			print "Error Message: "+GeODin.ExceptionMsg.encode('utf-8')
 			
 		f = open(self.tmp + "\\out.pdf", 'wb')
 		if isinstance(pic[0], unicode):
-			f.write(pic[0].encode('utf-8'))
+			f.write("<!DOCTYPE html><html><head><meta charset='utf-8'/></head><body>\r\n" + pic[0].replace("\r\n","</br>").encode('utf-8')+"\r\n</body></html>")
 		else:
 			f.write(pic[0])
 		#f.write(pic[0])
@@ -148,13 +172,16 @@ class DisplayLayout(QDialog):
 
 		GeODin = None
 		
-		ImageLayout(self.tmp + "\\out.pdf", selected[0].text())
+		self.layoutDialog = ImageLayout(self.tmp + "/out.pdf", selected[0].text())
+		
 		
 	def cancel(self):
-		self.main = None
-		self.object = None
-		self.layoutFoldersList = None
+		self.closed = True
 		self.accept()
+		#self.main = None
+		#self.object = None
+		#self.layoutFoldersList = None
+		#self.accept()
 		
 	def newFolder(self, event):
 		# get path for GeODin data
@@ -214,10 +241,12 @@ class DisplayLayout(QDialog):
 class ImageLayout(QDialog):
 	def __init__(self, path, title):
 		QDialog.__init__(self)
+		#self.setModal(False)
 		
 		offset = 100#px
 		windowsSize = [GetSystemMetrics(0)-offset, GetSystemMetrics(1)-offset]
 		self.setWindowTitle(title)
+		self.setWindowFlags(Qt.Window)# | Qt.WindowTitleHint | Qt.WindowCloseButtonHint | Qt.CustomizeWindowHint)
 		self.horizontalLayout = QHBoxLayout(self)
 		self.horizontalLayout.setMargin(0)
 
@@ -235,5 +264,14 @@ class ImageLayout(QDialog):
 		self.webView.show()		
 		self.webView.load(QUrl(path)) # Change path to actual file.
 
+		QApplication.restoreOverrideCursor()
 		self.exec_()
+		#self.show()
+		
+	def closeEvent(self, evnt):
+		self.webView.close()
+		self.close()
+		
+		
+
 		
